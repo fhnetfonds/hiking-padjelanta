@@ -12,24 +12,18 @@
     <style>
         :root {
             --md-primary: #1a73e8;
-            --md-primary-light: #4285f4;
-            --md-primary-container: #d3e3fd;
-            --md-secondary: #e8710a;
-            --md-secondary-light: #f9a825;
             --md-tertiary: #0d652d;
             --md-tertiary-light: #34a853;
+            --md-secondary: #e8710a;
             --md-surface: #ffffff;
             --md-surface-dim: #f8f9fa;
             --md-surface-container: #f1f3f4;
-            --md-surface-container-high: #e8eaed;
             --md-on-surface: #1f1f1f;
             --md-on-surface-variant: #5f6368;
             --md-outline: #dadce0;
             --md-outline-variant: #e8eaed;
-            --md-error: #d93025;
             --md-shadow-1: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
             --md-shadow-2: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
-            --md-shadow-3: 0 4px 8px 3px rgba(60,64,67,0.15), 0 1px 3px rgba(60,64,67,0.3);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -39,7 +33,7 @@
             background: var(--md-surface-dim);
             color: var(--md-on-surface);
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         .material-symbols-outlined {
@@ -47,382 +41,368 @@
             vertical-align: middle;
         }
 
+        /* Header - moved right of zoom controls */
         header {
-            padding: 1rem 1.5rem;
-            background: var(--md-surface);
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            position: absolute;
+            top: 8px;
+            left: 60px;
+            right: auto;
+            z-index: 1000;
+            border-radius: 8px;
             box-shadow: var(--md-shadow-1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            max-width: 1800px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .header-left { display: flex; align-items: center; gap: 1rem; }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--md-tertiary) 0%, var(--md-tertiary-light) 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
         }
 
         h1 {
-            font-family: 'Google Sans', 'Roboto', sans-serif;
-            font-size: 1.5rem;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 1rem;
             font-weight: 500;
-            color: var(--md-on-surface);
+            white-space: nowrap;
         }
 
         h1 span { color: var(--md-tertiary); }
-        .subtitle { font-size: 0.875rem; color: var(--md-on-surface-variant); }
-        .header-stats { display: flex; gap: 0.5rem; }
 
-        .stat-chip {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: var(--md-surface-container);
-            border-radius: 100px;
-            font-size: 0.875rem;
-        }
-
-        .stat-chip .material-symbols-outlined { font-size: 18px; color: var(--md-tertiary); }
-        .stat-value { font-weight: 500; color: var(--md-on-surface); }
-        .stat-label { color: var(--md-on-surface-variant); }
-
+        /* Main layout */
         .main-container {
             display: grid;
-            grid-template-columns: 1fr 520px;
-            height: calc(100vh - 80px);
+            grid-template-columns: 1fr 440px;
+            height: 100vh;
         }
 
         .map-container { position: relative; }
-        #map { width: 100%; height: 100%; background: var(--md-surface-container); }
+        #map { width: 100%; height: 100%; }
 
-        .elevation-panel {
+        /* Progress Card */
+        .progress-card {
             position: absolute;
-            bottom: 16px;
-            left: 16px;
-            right: 16px;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
             background: var(--md-surface);
             border-radius: 16px;
             box-shadow: var(--md-shadow-2);
-            padding: 1rem;
             z-index: 1000;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
-        .elevation-header {
-            display: flex;
-            justify-content: space-between;
+        .progress-card.collapsed .progress-full { display: none; }
+        .progress-card.collapsed .progress-mini { display: flex; }
+
+        .progress-mini {
+            display: none;
             align-items: center;
-            margin-bottom: 0.75rem;
+            justify-content: space-between;
+            padding: 0.625rem 1rem;
+            cursor: pointer;
         }
 
-        .elevation-title {
-            font-weight: 500;
-            font-size: 0.875rem;
+        .progress-mini-left {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .elevation-stats {
+        .progress-mini-day { font-weight: 500; font-size: 0.8125rem; }
+        .progress-mini-name { font-size: 0.6875rem; color: var(--md-on-surface-variant); }
+        .progress-mini-km { font-size: 0.8125rem; font-weight: 500; color: var(--md-tertiary); }
+
+        .progress-full { padding: 0.875rem; }
+
+        .progress-header {
             display: flex;
-            gap: 1rem;
-            font-size: 0.75rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.375rem;
+        }
+
+        .progress-day-info {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .progress-day {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 0.9375rem;
+            font-weight: 500;
+        }
+
+        .progress-name {
+            font-size: 0.8125rem;
             color: var(--md-on-surface-variant);
         }
 
-        .elevation-chart { height: 100px; position: relative; }
+        .progress-stats {
+            display: flex;
+            gap: 0.75rem;
+            font-size: 0.6875rem;
+            color: var(--md-on-surface-variant);
+        }
+
+        .progress-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: var(--md-on-surface-variant);
+            display: none;
+        }
+
+        /* Slider */
+        .day-slider-container { margin: 0.5rem 0; }
+
+        .day-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--md-outline-variant);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .day-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--md-tertiary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--md-shadow-1);
+        }
+
+        .day-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--md-tertiary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .day-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.25rem;
+            font-size: 0.5625rem;
+            color: var(--md-on-surface-variant);
+        }
+
+        /* Elevation Chart */
+        .elevation-chart {
+            height: 55px;
+            position: relative;
+            margin-top: 0.375rem;
+        }
+
         .elevation-svg { width: 100%; height: 100%; }
 
         .elevation-marker {
             position: absolute;
             top: 0;
             width: 2px;
-            height: 80px;
+            height: 45px;
             background: var(--md-secondary);
             display: none;
-            pointer-events: none;
         }
 
         .elevation-marker.active { display: block; }
 
         .elevation-tooltip {
             position: absolute;
-            top: -30px;
+            top: -20px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--md-on-surface);
-            color: var(--md-surface);
-            padding: 0.25rem 0.5rem;
+            color: white;
+            padding: 0.125rem 0.375rem;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-size: 0.5625rem;
             white-space: nowrap;
         }
 
-        .elevation-point {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: var(--md-secondary);
-            border: 2px solid white;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: var(--md-shadow-1);
-            display: none;
-            pointer-events: none;
-        }
-
-        .elevation-point.active { display: block; }
-
+        /* Sidebar */
         .sidebar {
             background: var(--md-surface);
             border-left: 1px solid var(--md-outline);
-            overflow-y: auto;
-            padding: 1rem;
-        }
-
-        .sidebar::-webkit-scrollbar { width: 8px; }
-        .sidebar::-webkit-scrollbar-track { background: transparent; }
-        .sidebar::-webkit-scrollbar-thumb { background: var(--md-outline); border-radius: 4px; }
-
-        .progress-section {
-            background: var(--md-surface-container);
-            border-radius: 16px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .progress-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-        }
-
-        .progress-title {
-            font-weight: 500;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .progress-value { font-size: 0.875rem; color: var(--md-on-surface-variant); }
-
-        .progress-bar {
-            height: 8px;
-            background: var(--md-outline-variant);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--md-tertiary) 0%, var(--md-tertiary-light) 100%);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        .progress-stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--md-on-surface-variant);
-        }
-
-        .section-title {
-            font-family: 'Google Sans', 'Roboto', sans-serif;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--md-on-surface-variant);
-            margin: 1.5rem 0 0.75rem 0;
-            padding-left: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title .material-symbols-outlined { font-size: 20px; }
-
-        .waypoint-card {
-            background: var(--md-surface);
-            border: 1px solid var(--md-outline-variant);
-            border-radius: 16px;
-            margin-bottom: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            flex-direction: column;
             overflow: hidden;
         }
 
-        .waypoint-card:hover {
-            box-shadow: var(--md-shadow-1);
-            border-color: var(--md-outline);
-        }
-
-        .waypoint-card.active {
-            border-color: var(--md-tertiary);
-            box-shadow: var(--md-shadow-2);
-        }
-
-        .waypoint-card.transport { border-left: 4px solid var(--md-primary); }
-        .waypoint-card.trek { border-left: 4px solid var(--md-tertiary); }
-
-        .card-main { padding: 1rem; }
-
-        .card-header {
+        .sidebar-header {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--md-outline-variant);
             display: flex;
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .card-thumbnail {
-            width: 64px;
-            height: 64px;
-            border-radius: 12px;
-            background: var(--md-surface-container);
-            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
             flex-shrink: 0;
         }
 
-        .card-thumbnail .material-symbols-outlined {
-            font-size: 32px;
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 500;
             color: var(--md-on-surface-variant);
         }
 
-        .card-thumbnail.trek-thumb {
-            background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
-        }
-
-        .card-thumbnail.trek-thumb .material-symbols-outlined { color: var(--md-tertiary); }
-
-        .card-thumbnail.transport-thumb {
-            background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
-        }
-
-        .card-thumbnail.transport-thumb .material-symbols-outlined { color: var(--md-primary); }
-
-        .card-info { flex: 1; min-width: 0; }
-
-        .card-title-row {
+        .view-toggle {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 0.5rem;
+            background: var(--md-surface-container);
+            border-radius: 8px;
+            padding: 2px;
         }
 
-        .card-title {
-            font-family: 'Google Sans', 'Roboto', sans-serif;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--md-on-surface);
-        }
-
-        .card-day {
-            font-size: 0.75rem;
-            font-weight: 500;
+        .view-btn {
             padding: 0.25rem 0.5rem;
-            border-radius: 100px;
-            white-space: nowrap;
+            font-size: 0.625rem;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--md-on-surface-variant);
+            transition: all 0.2s;
         }
 
-        .card-day.trek { background: #e8f5e9; color: var(--md-tertiary); }
-        .card-day.transport { background: #e3f2fd; color: var(--md-primary); }
-
-        .card-subtitle {
-            font-size: 0.75rem;
-            color: var(--md-on-surface-variant);
-            margin-top: 0.125rem;
+        .view-btn.active {
+            background: var(--md-surface);
+            color: var(--md-on-surface);
+            box-shadow: var(--md-shadow-1);
         }
 
-        .card-progress {
-            margin-top: 0.5rem;
-            font-size: 0.75rem;
+        .view-btn.gpx-complete {
+            background: var(--md-tertiary);
+            color: white;
+            font-weight: 500;
+        }
+
+        .view-btn.gpx-complete:hover {
+            background: #0a5224;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .sidebar-content::-webkit-scrollbar { width: 6px; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: var(--md-outline); border-radius: 3px; }
+
+        .section-title {
+            font-size: 0.6875rem;
+            font-weight: 500;
             color: var(--md-on-surface-variant);
+            margin: 0.75rem 0 0.375rem 0;
             display: flex;
             align-items: center;
             gap: 0.25rem;
         }
 
-        .card-progress .material-symbols-outlined {
-            font-size: 14px;
-            color: var(--md-tertiary);
+        .section-title .material-symbols-outlined { font-size: 16px; }
+
+        /* Waypoint Cards - Full View */
+        .waypoint-card {
+            background: var(--md-surface);
+            border: 1px solid var(--md-outline-variant);
+            border-radius: 10px;
+            margin-bottom: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
         }
+
+        .waypoint-card:hover { box-shadow: var(--md-shadow-1); }
+        .waypoint-card.active { border-color: var(--md-tertiary); box-shadow: var(--md-shadow-2); }
+        .waypoint-card.transport { border-left: 3px solid var(--md-primary); }
+        .waypoint-card.trek { border-left: 3px solid var(--md-tertiary); }
+
+        .card-main { padding: 0.625rem; }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.375rem;
+        }
+
+        .card-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .card-subtitle {
+            font-size: 0.625rem;
+            color: var(--md-on-surface-variant);
+        }
+
+        .card-day {
+            font-size: 0.5625rem;
+            font-weight: 500;
+            padding: 0.125rem 0.3125rem;
+            border-radius: 100px;
+        }
+
+        .card-day.trek { background: #e8f5e9; color: var(--md-tertiary); }
+        .card-day.transport { background: #e3f2fd; color: var(--md-primary); }
 
         .card-stats {
             display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
+            gap: 0.25rem;
+            margin-bottom: 0.375rem;
             flex-wrap: wrap;
         }
 
         .stat-badge {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.375rem 0.625rem;
+            gap: 0.125rem;
+            padding: 0.1875rem 0.375rem;
             background: var(--md-surface-container);
-            border-radius: 8px;
-            font-size: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.625rem;
         }
 
-        .stat-badge .material-symbols-outlined { font-size: 16px; color: var(--md-on-surface-variant); }
-        .stat-badge.distance .material-symbols-outlined { color: var(--md-primary); }
-        .stat-badge.ascent .material-symbols-outlined { color: var(--md-tertiary); }
-        .stat-badge.descent .material-symbols-outlined { color: var(--md-secondary); }
+        .stat-badge .material-symbols-outlined { font-size: 12px; }
 
         .card-details {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             line-height: 1.5;
             color: var(--md-on-surface-variant);
-            margin-bottom: 0.75rem;
         }
 
-        .card-requirements {
+        .card-coords {
+            font-size: 0.5625rem;
+            color: var(--md-on-surface-variant);
+            font-family: 'Roboto Mono', monospace;
+            margin-top: 0.375rem;
             display: flex;
-            gap: 1rem;
-            padding: 0.75rem;
-            background: var(--md-surface-container);
-            border-radius: 12px;
-            margin-bottom: 0.75rem;
-        }
-
-        .requirement {
-            display: flex;
-            flex-direction: column;
             align-items: center;
             gap: 0.25rem;
-            font-size: 0.625rem;
-            color: var(--md-on-surface-variant);
-            text-align: center;
         }
 
-        .requirement .material-symbols-outlined { font-size: 24px; color: var(--md-outline); }
-        .requirement.available .material-symbols-outlined { color: var(--md-tertiary); }
+        .card-coords .material-symbols-outlined { font-size: 12px; }
 
-        .card-tags { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.1875rem;
+        }
 
         .tag {
-            font-size: 0.6875rem;
-            padding: 0.25rem 0.5rem;
+            font-size: 0.5625rem;
+            padding: 0.125rem 0.3125rem;
             border-radius: 100px;
             font-weight: 500;
         }
@@ -433,286 +413,206 @@
         .tag.transport { background: #e3f2fd; color: #1565c0; }
         .tag.activity { background: #f3e5f5; color: #7b1fa2; }
 
-        .card-accordion { border-top: 1px solid var(--md-outline-variant); }
-
-        .accordion-header {
+        .gpx-btn {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            font-size: 0.875rem;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--md-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.5625rem;
             font-weight: 500;
-            color: var(--md-on-surface-variant);
+            cursor: pointer;
             transition: background 0.2s;
         }
 
-        .accordion-header:hover { background: var(--md-surface-container); }
-        .accordion-header .material-symbols-outlined { transition: transform 0.2s; }
-        .accordion-header.open .material-symbols-outlined { transform: rotate(180deg); }
+        .gpx-btn:hover { background: #1557b0; }
+        .gpx-btn .material-symbols-outlined { font-size: 14px; }
 
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .accordion-content.open { max-height: 600px; }
-        .accordion-inner { padding: 0 1rem 1rem; }
-
-        .activity-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background: var(--md-surface-container);
-            border-radius: 12px;
-            margin-bottom: 0.5rem;
-        }
-
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .activity-icon .material-symbols-outlined { font-size: 24px; color: white; }
-        .activity-icon.hiking { background: linear-gradient(135deg, #2e7d32, #66bb6a); }
-        .activity-icon.fishing { background: linear-gradient(135deg, #0277bd, #4fc3f7); }
-        .activity-icon.swimming { background: linear-gradient(135deg, #00838f, #4dd0e1); }
-        .activity-icon.sauna { background: linear-gradient(135deg, #d84315, #ff8a65); }
-        .activity-icon.photography { background: linear-gradient(135deg, #5e35b1, #b39ddb); }
-        .activity-icon.wildlife { background: linear-gradient(135deg, #558b2f, #aed581); }
-        .activity-icon.summit { background: linear-gradient(135deg, #e65100, #ffb74d); }
-        .activity-icon.food { background: linear-gradient(135deg, #ef6c00, #ffcc80); }
-
-        .activity-content { flex: 1; }
-        .activity-title { font-weight: 500; font-size: 0.875rem; color: var(--md-on-surface); margin-bottom: 0.25rem; }
-        .activity-desc { font-size: 0.75rem; color: var(--md-on-surface-variant); line-height: 1.4; }
-
-        .leaflet-container { font-family: 'Roboto', sans-serif; }
-
-        .leaflet-popup-content-wrapper {
-            background: var(--md-surface);
-            color: var(--md-on-surface);
-            border-radius: 16px;
-            box-shadow: var(--md-shadow-3);
-            padding: 0;
-        }
-
-        .leaflet-popup-content { margin: 0; min-width: 200px; }
-        .leaflet-popup-tip { background: var(--md-surface); }
-        .popup-content { padding: 1rem; }
-
-        .popup-title {
-            font-family: 'Google Sans', 'Roboto', sans-serif;
-            font-size: 1rem;
+        .price-badge {
+            font-size: 0.6875rem;
             font-weight: 500;
-            margin-bottom: 0.25rem;
+            color: var(--md-tertiary);
         }
 
-        .popup-subtitle { font-size: 0.75rem; color: var(--md-on-surface-variant); margin-bottom: 0.5rem; }
-        .popup-stats { display: flex; gap: 0.75rem; font-size: 0.75rem; }
-        .popup-stat { display: flex; align-items: center; gap: 0.25rem; }
-        .popup-stat .material-symbols-outlined { font-size: 16px; }
+        /* Mini Card View */
+        .sidebar.mini-view .card-details,
+        .sidebar.mini-view .card-coords,
+        .sidebar.mini-view .card-footer { display: none; }
 
+        .sidebar.mini-view .waypoint-card { margin-bottom: 0.25rem; }
+        .sidebar.mini-view .card-main { padding: 0.5rem; }
+
+        .sidebar.mini-view .card-title {
+            font-size: 0.8125rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .sidebar.mini-view .card-stats { margin-bottom: 0; }
+
+        /* Map markers */
         .custom-marker {
             background: var(--md-tertiary);
-            border: 3px solid white;
+            border: 2px solid white;
             border-radius: 50%;
             box-shadow: var(--md-shadow-1);
         }
 
         .custom-marker.transport { background: var(--md-primary); }
-        .custom-marker.start { background: var(--md-secondary); }
 
         .custom-marker.numbered {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             color: white;
         }
 
-        .map-legend {
-            position: absolute;
-            top: 70px;
-            right: 16px;
-            background: var(--md-surface);
+        .leaflet-popup-content-wrapper {
             border-radius: 12px;
             box-shadow: var(--md-shadow-2);
-            padding: 0.75rem 1rem;
-            z-index: 1000;
-            font-size: 0.75rem;
         }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
+        .leaflet-popup-content { margin: 0.75rem; }
 
-        .legend-item:last-child { margin-bottom: 0; }
-        .legend-line { width: 24px; height: 4px; border-radius: 2px; }
-        .legend-line.trek { background: var(--md-tertiary); }
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: var(--map-height, 50vh) 1fr;
+            }
 
-        .legend-line.transport {
-            background: repeating-linear-gradient(90deg, var(--md-primary), var(--md-primary) 4px, transparent 4px, transparent 8px);
-        }
+            .main-container.large-map { --map-height: 65vh; }
+            .main-container.small-map { --map-height: 35vh; }
 
-        .price-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.375rem 0.625rem;
-            background: #e8f5e9;
-            border-radius: 8px;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            color: var(--md-tertiary);
-            margin-top: 0.5rem;
-        }
+            header {
+                left: 50px;
+                top: 6px;
+                padding: 0.375rem 0.75rem;
+            }
 
-        .price-badge .material-symbols-outlined { font-size: 16px; }
+            h1 { font-size: 0.9375rem; }
 
-        @media (max-width: 1200px) {
-            .main-container { grid-template-columns: 1fr; grid-template-rows: 50vh 1fr; }
-            .sidebar { border-left: none; border-top: 1px solid var(--md-outline); }
-            .elevation-panel { bottom: 8px; left: 8px; right: 8px; }
-        }
+            .progress-toggle { display: block; }
 
-        @media (max-width: 768px) {
-            header { padding: 0.75rem 1rem; }
-            .header-stats { display: none; }
-            h1 { font-size: 1.25rem; }
-            .logo-icon { width: 40px; height: 40px; }
+            .progress-card {
+                left: 6px;
+                right: 6px;
+                bottom: 6px;
+            }
+
+            .progress-card.collapsed .progress-mini { display: flex; }
+
+            .sidebar {
+                border-left: none;
+                border-top: 1px solid var(--md-outline);
+            }
+
+            .sidebar-content { padding: 0.375rem; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <div class="header-left">
-                <div class="logo-icon">
-                    <span class="material-symbols-outlined">landscape</span>
-                </div>
-                <div>
-                    <h1>Padjelanta <span>Trek</span></h1>
-                    <div class="subtitle">Schwedisch-Lappland → Norwegen · Sommer 2026</div>
-                </div>
-            </div>
-            <div class="header-stats">
-                <div class="stat-chip">
-                    <span class="material-symbols-outlined">straighten</span>
-                    <span class="stat-value">102</span>
-                    <span class="stat-label">km</span>
-                </div>
-                <div class="stat-chip">
-                    <span class="material-symbols-outlined">trending_up</span>
-                    <span class="stat-value">2.650</span>
-                    <span class="stat-label">hm ↑</span>
-                </div>
-                <div class="stat-chip">
-                    <span class="material-symbols-outlined">trending_down</span>
-                    <span class="stat-value">2.550</span>
-                    <span class="stat-label">hm ↓</span>
-                </div>
-                <div class="stat-chip">
-                    <span class="material-symbols-outlined">calendar_today</span>
-                    <span class="stat-value">8-9</span>
-                    <span class="stat-label">Tage</span>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <div class="main-container">
+    <div class="main-container" id="mainContainer">
         <div class="map-container">
+            <header>
+                <h1>Padjelanta <span>Trek</span> 2026</h1>
+            </header>
+            
             <div id="map"></div>
             
-            <div class="map-legend">
-                <div class="legend-item">
-                    <div class="legend-line trek"></div>
-                    <span>Trekking-Route</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-line transport"></div>
-                    <span>An-/Abreise</span>
-                </div>
-            </div>
-
-            <div class="elevation-panel">
-                <div class="elevation-header">
-                    <div class="elevation-title">
-                        <span class="material-symbols-outlined">show_chart</span>
-                        Höhenprofil
+            <div class="progress-card" id="progressCard">
+                <div class="progress-mini" onclick="toggleProgressCard()">
+                    <div class="progress-mini-left">
+                        <span class="progress-mini-day" id="miniDay">Tag 1</span>
+                        <span class="progress-mini-name" id="miniName">Vaisaluokta → Kutjaure</span>
                     </div>
-                    <div class="elevation-stats">
-                        <span>Min: 450m</span>
-                        <span>Max: 1.050m</span>
-                    </div>
+                    <span class="progress-mini-km" id="miniKm">17 km</span>
                 </div>
-                <div class="elevation-chart" id="elevationChart">
-                    <svg class="elevation-svg" viewBox="0 0 800 80" preserveAspectRatio="none">
-                        <defs>
-                            <linearGradient id="elevGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#34a853" stop-opacity="0.4"/>
-                                <stop offset="100%" stop-color="#34a853" stop-opacity="0.05"/>
-                            </linearGradient>
-                        </defs>
-                        <path id="elevationArea" fill="url(#elevGradient)" />
-                        <path id="elevationLine" fill="none" stroke="#34a853" stroke-width="2" />
-                        <g id="stageMarkers"></g>
-                    </svg>
-                    <div class="elevation-marker" id="elevMarker">
-                        <div class="elevation-tooltip" id="elevTooltip"></div>
+                
+                <div class="progress-full">
+                    <div class="progress-header">
+                        <div class="progress-day-info">
+                            <span class="progress-day" id="currentDay">Tag 1</span>
+                            <span class="progress-name" id="currentName">Vaisaluokta → Kutjaure</span>
+                        </div>
+                        <button class="progress-toggle" onclick="toggleProgressCard()">
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </button>
                     </div>
-                    <div class="elevation-point" id="elevPoint"></div>
+                    
+                    <div class="progress-stats">
+                        <span id="dayDistance">17 km</span>
+                        <span id="dayAscent">↑ 480 hm</span>
+                        <span id="dayDescent">↓ 370 hm</span>
+                        <span id="cumDistance">Gesamt: 17 / 97 km</span>
+                    </div>
+                    
+                    <div class="day-slider-container">
+                        <input type="range" class="day-slider" id="daySlider" min="0" max="8" value="1">
+                        <div class="day-labels">
+                            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span>
+                        </div>
+                    </div>
+                    
+                    <div class="elevation-chart" id="elevationChart">
+                        <svg class="elevation-svg" viewBox="0 0 800 50" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="elevGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#34a853" stop-opacity="0.4"/>
+                                    <stop offset="100%" stop-color="#34a853" stop-opacity="0.05"/>
+                                </linearGradient>
+                            </defs>
+                            <path id="elevationArea" fill="url(#elevGradient)" />
+                            <path id="elevationLine" fill="none" stroke="#34a853" stroke-width="2" />
+                        </svg>
+                        <div class="elevation-marker" id="elevMarker">
+                            <div class="elevation-tooltip" id="elevTooltip"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="sidebar">
-            <div class="progress-section">
-                <div class="progress-header">
-                    <div class="progress-title">
-                        <span class="material-symbols-outlined">flag</span>
-                        Gesamtfortschritt
-                    </div>
-                    <div class="progress-value" id="progressValue">0 / 102 km</div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-                </div>
-                <div class="progress-stats">
-                    <span id="progressHmUp">↑ 0 / 2.650 hm</span>
-                    <span id="progressHmDown">↓ 0 / 2.550 hm</span>
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-title">Etappen</span>
+                <div class="view-toggle">
+                    <button class="view-btn gpx-complete" onclick="downloadCompleteGPX()" title="Gesamte Tour als GPX">
+                        <span class="material-symbols-outlined" style="font-size:14px">download</span> GPX
+                    </button>
+                    <button class="view-btn active" onclick="setView('full')" id="fullViewBtn">Voll</button>
+                    <button class="view-btn" onclick="setView('mini')" id="miniViewBtn">Mini</button>
+                    <button class="view-btn" onclick="toggleMapSize()" id="mapSizeBtn" title="Kartengröße">
+                        <span class="material-symbols-outlined" style="font-size:14px">aspect_ratio</span>
+                    </button>
                 </div>
             </div>
+            <div class="sidebar-content">
+                <div class="section-title">
+                    <span class="material-symbols-outlined">train</span>
+                    Anreise
+                </div>
+                <div id="transport-arrival"></div>
 
-            <div class="section-title">
-                <span class="material-symbols-outlined">train</span>
-                Anreise
-            </div>
-            <div id="transport-arrival"></div>
+                <div class="section-title">
+                    <span class="material-symbols-outlined">hiking</span>
+                    Trekking
+                </div>
+                <div id="trek-stages"></div>
 
-            <div class="section-title">
-                <span class="material-symbols-outlined">hiking</span>
-                Trekking-Etappen
+                <div class="section-title">
+                    <span class="material-symbols-outlined">home</span>
+                    Abreise
+                </div>
+                <div id="transport-departure"></div>
             </div>
-            <div id="trek-stages"></div>
-
-            <div class="section-title">
-                <span class="material-symbols-outlined">home</span>
-                Abreise
-            </div>
-            <div id="transport-departure"></div>
         </div>
     </div>
 
@@ -720,7 +620,6 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         
-        // Currency conversion rates
         const SEK_TO_EUR = 0.087;
         const NOK_TO_EUR = 0.084;
         
@@ -730,445 +629,434 @@
             return '';
         }
 
-        // =====================================================
-        // VERIFIED COORDINATES from hiking-europe.eu, padjelanta.se, fjeldsofsweden.com, wikivoyage
-        // =====================================================
-        
-        // All hut coordinates verified from official sources:
+        function formatCoords(coords) {
+            return `${coords[0].toFixed(4)}°N, ${coords[1].toFixed(4)}°E`;
+        }
+
+        // View controls
+        window.toggleProgressCard = function() {
+            document.getElementById('progressCard').classList.toggle('collapsed');
+        };
+
+        window.setView = function(view) {
+            const sidebar = document.getElementById('sidebar');
+            document.getElementById('fullViewBtn').classList.toggle('active', view === 'full');
+            document.getElementById('miniViewBtn').classList.toggle('active', view === 'mini');
+            sidebar.classList.toggle('mini-view', view === 'mini');
+        };
+
+        let mapSizeState = 0;
+        window.toggleMapSize = function() {
+            const container = document.getElementById('mainContainer');
+            container.classList.remove('large-map', 'small-map');
+            mapSizeState = (mapSizeState + 1) % 3;
+            if (mapSizeState === 1) container.classList.add('large-map');
+            else if (mapSizeState === 2) container.classList.add('small-map');
+            setTimeout(() => map.invalidateSize(), 300);
+        };
+
+        // Coordinates
         const COORDS = {
-            // Transport
             stockholm: [59.3293, 18.0686],
             gallivare: [67.1333, 20.65],
-            ritsem: [67.72, 17.47],  // From Wikivoyage
-            
-            // Trek stages - VERIFIED
-            vaisaluokta: [67.6878, 17.2508],  // 67°41'16"N, 17°15'03"E from fjeldsofsweden.com
-            kutjaure: [67.5867, 17.0333],     // 67°35'12"N, 17°02'00"E from fjeldsofsweden.com
-            laddejahka: [67.4637, 16.9020],   // 67.463684, 16.902009 from padjelanta.se
-            arasluokta: [67.3739, 16.7999],   // 67.373948, 16.799861 from padjelanta.se
-            staloluokta: [67.3181, 16.6975],  // 67.318108, 16.697541 from padjelanta.se
-            staddajahka: [67.2700, 16.5500],  // Estimated between Staloluokta and Sårjåsjaure
-            sarjasjaure: [67.2321, 16.4780],  // 67.23207, 16.47801 from Wikivoyage
-            sorjushytta: [67.2069, 16.2556],  // 67.20694, 16.25555 from Wikivoyage
-            nysulitjelma: [67.1401, 16.1375], // 67.14013, 16.13752 from Wikivoyage
-            
-            // Departure
+            ritsem: [67.72, 17.47],
+            vaisaluokta: [67.6878, 17.2508],
+            kutjaure: [67.5867, 17.0333],
+            laddejahka: [67.4637, 16.9020],
+            arasluokta: [67.3739, 16.7999],
+            staloluokta: [67.3181, 16.6975],
+            staddajahka: [67.2700, 16.5500],
+            sarjasjaure: [67.2321, 16.4780],
+            sorjushytta: [67.2069, 16.2556],
+            nysulitjelma: [67.1401, 16.1375],
             fauske: [67.2596, 15.3911]
         };
 
-        // Detailed hiking route with waypoints between huts
+        // Detailed route waypoints for GPX export
+        const routeWaypoints = {
+            'vaisaluokta-kutjaure': [
+                COORDS.vaisaluokta, [67.66, 17.20], [67.64, 17.15], [67.62, 17.10], [67.60, 17.05], COORDS.kutjaure
+            ],
+            'kutjaure-laddejahka': [
+                COORDS.kutjaure, [67.56, 17.00], [67.54, 16.97], [67.52, 16.95], [67.50, 16.93], [67.48, 16.91], COORDS.laddejahka
+            ],
+            'laddejahka-arasluokta': [
+                COORDS.laddejahka, [67.45, 16.87], [67.43, 16.84], [67.41, 16.82], [67.39, 16.80], COORDS.arasluokta
+            ],
+            'arasluokta-staloluokta': [
+                COORDS.arasluokta, [67.36, 16.77], [67.35, 16.74], [67.34, 16.71], COORDS.staloluokta
+            ],
+            'staloluokta-staddajahka': [
+                COORDS.staloluokta, [67.31, 16.67], [67.30, 16.63], [67.29, 16.60], [67.28, 16.57], COORDS.staddajahka
+            ],
+            'staddajahka-sarjasjaure': [
+                COORDS.staddajahka, [67.26, 16.53], [67.25, 16.50], COORDS.sarjasjaure
+            ],
+            'sarjasjaure-sorjushytta': [
+                COORDS.sarjasjaure, [67.23, 16.43], [67.22, 16.38], [67.22, 16.33], [67.21, 16.28], COORDS.sorjushytta
+            ],
+            'sorjushytta-nysulitjelma': [
+                COORDS.sorjushytta, [67.19, 16.22], [67.17, 16.19], [67.16, 16.16], COORDS.nysulitjelma
+            ]
+        };
+
+        // Generate GPX file
+        function generateGPX(stageName, waypoints, fromName, toName) {
+            const points = waypoints.map(p => `      <trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('\n');
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Padjelanta Trek Planner"
+     xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>Padjelanta Trek: ${fromName} → ${toName}</name>
+    <desc>Etappe des Padjelanta/Nordkalottleden Treks</desc>
+  </metadata>
+  <trk>
+    <name>${fromName} → ${toName}</name>
+    <trkseg>
+${points}
+    </trkseg>
+  </trk>
+</gpx>`;
+        }
+
+        window.downloadGPX = function(stageKey, fromName, toName) {
+            const waypoints = routeWaypoints[stageKey];
+            if (!waypoints) return;
+            
+            const gpxContent = generateGPX(stageKey, waypoints, fromName, toName);
+            const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `padjelanta-${stageKey}.gpx`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // Generate complete multi-day GPX for Komoot
+        window.downloadCompleteGPX = function() {
+            const allWaypoints = [
+                { name: 'Vaisaluokta', coords: COORDS.vaisaluokta, desc: 'Start - Tag 1' },
+                { name: 'Kutjaure', coords: COORDS.kutjaure, desc: 'Etappe 1 - Tag 1' },
+                { name: 'Låddejåhkå', coords: COORDS.laddejahka, desc: 'Etappe 2 - Tag 2' },
+                { name: 'Árasluokta', coords: COORDS.arasluokta, desc: 'Etappe 3 - Tag 3' },
+                { name: 'Stáloluokta', coords: COORDS.staloluokta, desc: 'Etappe 4 - Tag 4' },
+                { name: 'Stáddajåhkå', coords: COORDS.staddajahka, desc: 'Etappe 5 - Tag 5' },
+                { name: 'Sårjåsjaure', coords: COORDS.sarjasjaure, desc: 'Etappe 6 - Tag 6' },
+                { name: 'Sorjushytta', coords: COORDS.sorjushytta, desc: 'Etappe 7 - Tag 7 (Norwegen)' },
+                { name: 'Ny Sulitjelma', coords: COORDS.nysulitjelma, desc: 'Ziel - Tag 8' }
+            ];
+
+            const waypointsXML = allWaypoints.map(wp => `  <wpt lat="${wp.coords[0]}" lon="${wp.coords[1]}">
+    <name>${wp.name}</name>
+    <desc>${wp.desc}</desc>
+  </wpt>`).join('\n');
+
+            const trackpoints = detailedTrekRoute.map(p => `      <trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('\n');
+
+            const gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Padjelanta Trek Planner"
+     xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>Padjelanta Trek 2026 - Komplett</name>
+    <desc>97km Mehrtagestrek von Vaisaluokta nach Ny Sulitjelma über den Padjelantaleden und Nordkalottleden. 8 Etappen durch Schwedisch-Lappland und Norwegen.</desc>
+    <author>
+      <name>Padjelanta Trek Planner</name>
+    </author>
+  </metadata>
+${waypointsXML}
+  <trk>
+    <name>Padjelanta Trek - Gesamtroute</name>
+    <desc>Vaisaluokta → Kutjaure → Låddejåhkå → Árasluokta → Stáloluokta → Stáddajåhkå → Sårjåsjaure → Sorjushytta → Ny Sulitjelma</desc>
+    <trkseg>
+${trackpoints}
+    </trkseg>
+  </trk>
+</gpx>`;
+
+            const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'padjelanta-trek-komplett.gpx';
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
         const detailedTrekRoute = [
-            // Vaisaluokta to Kutjaure (17km)
             COORDS.vaisaluokta,
             [67.66, 17.20], [67.64, 17.15], [67.62, 17.10], [67.60, 17.05],
             COORDS.kutjaure,
-            
-            // Kutjaure to Låddejåhkå (17km) 
-            [67.56, 17.00], [67.54, 16.97], [67.52, 16.95], [67.50, 16.93],
-            [67.48, 16.91],
+            [67.56, 17.00], [67.54, 16.97], [67.52, 16.95], [67.50, 16.93], [67.48, 16.91],
             COORDS.laddejahka,
-            
-            // Låddejåhkå to Árasluokta (12km)
             [67.45, 16.87], [67.43, 16.84], [67.41, 16.82], [67.39, 16.80],
             COORDS.arasluokta,
-            
-            // Árasluokta to Stáloluokta (10km)
             [67.36, 16.77], [67.35, 16.74], [67.34, 16.71],
             COORDS.staloluokta,
-            
-            // Stáloluokta to Stáddajåhkå (12km)
             [67.31, 16.67], [67.30, 16.63], [67.29, 16.60], [67.28, 16.57],
             COORDS.staddajahka,
-            
-            // Stáddajåhkå to Sårjåsjaure (6km)
             [67.26, 16.53], [67.25, 16.50],
             COORDS.sarjasjaure,
-            
-            // Sårjåsjaure to Sorjushytta (12km)
             [67.23, 16.43], [67.22, 16.38], [67.22, 16.33], [67.21, 16.28],
             COORDS.sorjushytta,
-            
-            // Sorjushytta to Ny Sulitjelma (11km) - CORRECTED short distance!
             [67.19, 16.22], [67.17, 16.19], [67.16, 16.16],
             COORDS.nysulitjelma
         ];
 
-        // Elevation data
         const elevationData = [
-            { km: 0, elev: 460, stage: 'Vaisaluokta', stageId: 'vaisaluokta' },
-            { km: 5, elev: 580 }, { km: 10, elev: 720 }, { km: 14, elev: 650 },
-            { km: 17, elev: 580, stage: 'Kutjaure', stageId: 'kutjaure' },
-            { km: 22, elev: 700 }, { km: 27, elev: 820 }, { km: 32, elev: 680 },
-            { km: 34, elev: 610, stage: 'Låddejåhkå', stageId: 'laddejahka' },
-            { km: 38, elev: 750 }, { km: 42, elev: 820 },
-            { km: 46, elev: 700, stage: 'Árasluokta', stageId: 'arasluokta' },
-            { km: 50, elev: 780 }, { km: 54, elev: 650 },
-            { km: 56, elev: 603, stage: 'Stáloluokta', stageId: 'staloluokta' },
-            { km: 60, elev: 680 }, { km: 64, elev: 720 },
-            { km: 68, elev: 705, stage: 'Stáddajåhkå', stageId: 'staddajahka' },
-            { km: 71, elev: 780 },
-            { km: 74, elev: 820, stage: 'Sårjåsjaure', stageId: 'sarjasjaure' },
-            { km: 78, elev: 900 }, { km: 82, elev: 980 },
-            { km: 86, elev: 850, stage: 'Sorjushytta', stageId: 'sorjushytta' },
-            { km: 89, elev: 950 }, { km: 93, elev: 1050 }, { km: 95, elev: 800 },
-            { km: 97, elev: 450, stage: 'Ny Sulitjelma', stageId: 'nysulitjelma' }
+            { km: 0, elev: 460 }, { km: 5, elev: 580 }, { km: 10, elev: 720 }, { km: 14, elev: 650 },
+            { km: 17, elev: 580 }, { km: 22, elev: 700 }, { km: 27, elev: 820 }, { km: 32, elev: 680 },
+            { km: 34, elev: 610 }, { km: 38, elev: 750 }, { km: 42, elev: 820 },
+            { km: 46, elev: 700 }, { km: 50, elev: 780 }, { km: 54, elev: 650 },
+            { km: 56, elev: 603 }, { km: 60, elev: 680 }, { km: 64, elev: 720 },
+            { km: 68, elev: 705 }, { km: 71, elev: 780 }, { km: 74, elev: 820 },
+            { km: 78, elev: 900 }, { km: 82, elev: 980 }, { km: 86, elev: 850 },
+            { km: 89, elev: 950 }, { km: 93, elev: 1050 }, { km: 95, elev: 800 }, { km: 97, elev: 450 }
         ];
 
-        // Scaling functions
         const maxElev = Math.max(...elevationData.map(d => d.elev));
         const minElev = Math.min(...elevationData.map(d => d.elev));
-        const maxKm = elevationData[elevationData.length - 1].km;
+        const maxKm = 97;
         const scaleX = (km) => (km / maxKm) * 800;
-        const scaleY = (elev) => 80 - ((elev - minElev) / (maxElev - minElev)) * 70 - 5;
+        const scaleY = (elev) => 50 - ((elev - minElev) / (maxElev - minElev)) * 40 - 5;
 
-        // Build elevation profile
         function buildElevationProfile() {
             let linePath = `M ${scaleX(elevationData[0].km)} ${scaleY(elevationData[0].elev)}`;
             elevationData.forEach(d => { linePath += ` L ${scaleX(d.km)} ${scaleY(d.elev)}`; });
-            let areaPath = linePath + ` L ${scaleX(maxKm)} 80 L 0 80 Z`;
-            
+            let areaPath = linePath + ` L ${scaleX(maxKm)} 50 L 0 50 Z`;
             document.getElementById('elevationLine').setAttribute('d', linePath);
             document.getElementById('elevationArea').setAttribute('d', areaPath);
-            
-            const markersGroup = document.getElementById('stageMarkers');
-            elevationData.filter(d => d.stage).forEach(d => {
-                const x = scaleX(d.km);
-                const y = scaleY(d.elev);
-                markersGroup.innerHTML += `<circle cx="${x}" cy="${y}" r="5" fill="#1a73e8" stroke="white" stroke-width="2" data-stage="${d.stageId}" class="stage-dot" style="cursor: pointer;"/>`;
-            });
         }
         buildElevationProfile();
 
-        function showElevationMarker(cumKm) {
+        // Day stages data
+        const dayStages = [
+            { day: 0, from: 'Ritsem', to: 'Vaisaluokta', dist: 0, asc: 0, desc: 0, cumDist: 0, id: 'vaisaluokta', coords: COORDS.vaisaluokta },
+            { day: 1, from: 'Vaisaluokta', to: 'Kutjaure', dist: 17, asc: 480, desc: 370, cumDist: 17, id: 'kutjaure', coords: COORDS.kutjaure },
+            { day: 2, from: 'Kutjaure', to: 'Låddejåhkå', dist: 17, asc: 460, desc: 480, cumDist: 34, id: 'laddejahka', coords: COORDS.laddejahka },
+            { day: 3, from: 'Låddejåhkå', to: 'Árasluokta', dist: 12, asc: 410, desc: 410, cumDist: 46, id: 'arasluokta', coords: COORDS.arasluokta },
+            { day: 4, from: 'Árasluokta', to: 'Stáloluokta', dist: 10, asc: 300, desc: 280, cumDist: 56, id: 'staloluokta', coords: COORDS.staloluokta },
+            { day: 5, from: 'Stáloluokta', to: 'Stáddajåhkå', dist: 12, asc: 250, desc: 140, cumDist: 68, id: 'staddajahka', coords: COORDS.staddajahka },
+            { day: 6, from: 'Stáddajåhkå', to: 'Sårjåsjaure', dist: 6, asc: 170, desc: 60, cumDist: 74, id: 'sarjasjaure', coords: COORDS.sarjasjaure },
+            { day: 7, from: 'Sårjåsjaure', to: 'Sorjushytta', dist: 12, asc: 190, desc: 180, cumDist: 86, id: 'sorjushytta', coords: COORDS.sorjushytta },
+            { day: 8, from: 'Sorjushytta', to: 'Ny Sulitjelma', dist: 11, asc: 390, desc: 630, cumDist: 97, id: 'nysulitjelma', coords: COORDS.nysulitjelma }
+        ];
+
+        let currentZoom = 9;
+
+        function updateSlider(dayIndex, scrollToCard = true, panMap = true) {
+            const stage = dayStages[dayIndex];
+            document.getElementById('currentDay').textContent = dayIndex === 0 ? 'Start' : `Tag ${dayIndex}`;
+            document.getElementById('currentName').textContent = `${stage.from} → ${stage.to}`;
+            document.getElementById('dayDistance').textContent = `${stage.dist} km`;
+            document.getElementById('dayAscent').textContent = `↑ ${stage.asc} hm`;
+            document.getElementById('dayDescent').textContent = `↓ ${stage.desc} hm`;
+            document.getElementById('cumDistance').textContent = `Gesamt: ${stage.cumDist} / 97 km`;
+            
+            document.getElementById('miniDay').textContent = dayIndex === 0 ? 'Start' : `Tag ${dayIndex}`;
+            document.getElementById('miniName').textContent = `${stage.from} → ${stage.to}`;
+            document.getElementById('miniKm').textContent = `${stage.dist} km`;
+            
+            // Elevation marker
             const elevChart = document.getElementById('elevationChart');
-            const elevMarker = document.getElementById('elevMarker');
-            const elevPoint = document.getElementById('elevPoint');
-            const elevTooltip = document.getElementById('elevTooltip');
+            const chartWidth = elevChart.offsetWidth;
+            const xPos = (stage.cumDist / maxKm) * chartWidth;
+            document.getElementById('elevMarker').style.left = `${xPos}px`;
+            document.getElementById('elevMarker').classList.add('active');
             
-            const chartRect = elevChart.getBoundingClientRect();
-            const chartWidth = chartRect.width;
-            const closest = elevationData.reduce((prev, curr) => Math.abs(curr.km - cumKm) < Math.abs(prev.km - cumKm) ? curr : prev);
-            
-            const xPercent = cumKm / maxKm;
-            const xPos = xPercent * chartWidth;
-            const yPercent = (closest.elev - minElev) / (maxElev - minElev);
-            const yPos = 80 - (yPercent * 70 + 5);
-            
-            elevMarker.style.left = `${xPos}px`;
-            elevMarker.classList.add('active');
-            elevTooltip.textContent = `${cumKm} km · ${closest.elev}m`;
-            
-            elevPoint.style.left = `${xPos}px`;
-            elevPoint.style.top = `${yPos}px`;
-            elevPoint.classList.add('active');
+            const closest = elevationData.reduce((prev, curr) => 
+                Math.abs(curr.km - stage.cumDist) < Math.abs(prev.km - stage.cumDist) ? curr : prev
+            );
+            document.getElementById('elevTooltip').textContent = `${stage.cumDist} km · ${closest.elev}m`;
+
+            // Scroll to card and highlight
+            if (scrollToCard) {
+                const card = document.querySelector(`[data-id="${stage.id}"]`);
+                if (card) {
+                    document.querySelectorAll('.waypoint-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            // Pan map without changing zoom
+            if (panMap && stage.coords) {
+                map.panTo(stage.coords, { animate: true, duration: 0.5 });
+                if (markers[stage.id]) {
+                    markers[stage.id].openPopup();
+                }
+            }
         }
+
+        document.getElementById('daySlider').addEventListener('input', (e) => {
+            updateSlider(parseInt(e.target.value), true, true);
+        });
 
         // Data
         const transportArrival = [
             {
-                id: 'stockholm', name: 'Stockholm', subtitle: 'Startpunkt der Reise',
+                id: 'stockholm', name: 'Stockholm', subtitle: 'Startpunkt',
                 coords: COORDS.stockholm, type: 'transport', day: 'Anreise',
-                icon: 'location_city', thumbnail: 'city',
-                details: 'Nachtzug nach Gällivare. Abfahrt Stockholm Central am Abend.',
-                tags: [{ text: 'Nachtzug', type: 'transport' }, { text: 'SJ / VY', type: 'transport' }],
-                requirements: [], activities: []
+                details: 'Nachtzug nach Gällivare. Abfahrt Stockholm Central am Abend, Ankunft am nächsten Morgen. Die Zugfahrt führt durch das nächtliche Schweden und über den Polarkreis.',
+                tags: [{ text: 'Nachtzug SJ/VY', type: 'transport' }]
             },
             {
-                id: 'gallivare', name: 'Gällivare', subtitle: 'Umstieg auf Bus',
+                id: 'gallivare', name: 'Gällivare', subtitle: 'Umstieg',
                 coords: COORDS.gallivare, type: 'transport', day: 'Anreise',
-                icon: 'swap_horiz', thumbnail: 'transfer',
-                details: 'Umstieg vom Zug auf den Bus nach Ritsem.',
-                tags: [{ text: 'Busverbindung', type: 'transport' }],
-                requirements: [], activities: []
+                details: 'Umstieg vom Zug auf den Bus nach Ritsem. Zeit für Kaffee und letzte Einkäufe. Die Busfahrt dauert etwa 3 Stunden durch beeindruckende Landschaft.',
+                tags: [{ text: 'Bus', type: 'transport' }]
             },
             {
                 id: 'ritsem', name: 'Ritsem', subtitle: 'STF Fjällstation',
                 coords: COORDS.ritsem, type: 'transport', day: 'Tag 0',
-                icon: 'cottage', thumbnail: 'cabin',
-                details: 'STF-Station mit Restaurant und Shop. Von hier Boot nach Vaisaluokta.',
+                details: 'Ritsem ist das Tor zum Padjelanta. Die STF-Fjällstation bietet Restaurant, Shop und Zimmer. Von hier startet das Boot M/S Storlule über den Akkajaure nach Vaisaluokta.',
                 priceSEK: 1260,
-                link: 'https://www.swedishtouristassociation.com/facilities/stf-ritsem/',
-                tags: [{ text: 'STF-Hütte', type: 'accommodation' }, { text: 'Fähre', type: 'transport' }],
-                requirements: [
-                    { icon: 'hotel', label: 'Betten', available: true },
-                    { icon: 'restaurant', label: 'Restaurant', available: true },
-                    { icon: 'local_grocery_store', label: 'Shop', available: true },
-                    { icon: 'shower', label: 'Dusche', available: true }
-                ],
-                activities: []
+                tags: [{ text: 'STF-Hütte', type: 'accommodation' }, { text: 'Fähre', type: 'transport' }]
             }
         ];
 
         const trekStages = [
             {
-                id: 'vaisaluokta', name: 'Vaisaluokta', subtitle: 'Start der Wanderung',
+                id: 'vaisaluokta', name: 'Vaisaluokta', subtitle: 'Start',
                 coords: COORDS.vaisaluokta, type: 'trek', day: 'Tag 1', stageNum: 0,
-                icon: 'flag', thumbnail: 'start',
-                distance: 0, ascent: 0, descent: 0,
-                cumDistance: 0, cumAscent: 0, cumDescent: 0, elevation: 460,
-                details: 'Ankunft per Boot von Ritsem. STF-Hütte am Akkajaure.',
+                distance: 0, ascent: 0, descent: 0, cumDistance: 0,
+                details: 'Ankunft per Boot von Ritsem. Die 40-minütige Überfahrt über den Akkajaure ist bereits ein Erlebnis – das mächtige Áhkká-Massiv mit seinen Gletschern thront am Horizont. Samische Sommersiedlung mit STF-Hütte direkt am Seeufer.',
                 priceSEK: 1260,
-                link: 'https://www.swedishtouristassociation.com/facilities/stf-vaisaluokta-mountain-cabin/',
                 tags: [{ text: 'STF-Hütte', type: 'accommodation' }],
-                requirements: [
-                    { icon: 'hotel', label: '20 Betten', available: true },
-                    { icon: 'restaurant', label: 'Küche', available: true },
-                    { icon: 'local_grocery_store', label: 'Shop', available: false },
-                    { icon: 'shower', label: 'Dusche', available: false }
-                ],
-                activities: [
-                    { icon: 'phishing', label: 'Angeln im Akkajaure', desc: 'Saibling und Forelle. Angelschein erforderlich.', type: 'fishing' },
-                    { icon: 'photo_camera', label: 'Fotografie', desc: 'Aussicht auf umliegende Berge bei Sonnenuntergang.', type: 'photography' }
-                ]
+                gpxKey: null
             },
             {
                 id: 'kutjaure', name: 'Kutjaure', subtitle: 'Etappe 1',
                 coords: COORDS.kutjaure, type: 'trek', day: 'Tag 1', stageNum: 1,
-                icon: 'cottage', thumbnail: 'lake',
-                distance: 17, ascent: 480, descent: 370,
-                cumDistance: 17, cumAscent: 480, cumDescent: 370, elevation: 580,
-                details: 'STF-Hütte am See Kutjaure. Spektakulärer Wasserfall in der Nähe.',
+                distance: 17, ascent: 480, descent: 370, cumDistance: 17,
+                details: 'Die erste richtige Wanderetappe durch ein U-förmiges Tal mit steilen Bergflanken. Man lässt die Birkenwälder hinter sich und gewinnt an Höhe. Nahe der Hütte lockt ein spektakulärer Wasserfall mit Höhlen. STF-Hütte mit Sauna am See.',
                 priceSEK: 1260,
-                link: 'https://www.swedishtouristassociation.com/facilities/stf-kutjaure-mountain-cabin/',
-                tags: [{ text: 'STF-Hütte', type: 'accommodation' }],
-                requirements: [
-                    { icon: 'hotel', label: '20 Betten', available: true },
-                    { icon: 'restaurant', label: 'Küche', available: true },
-                    { icon: 'local_grocery_store', label: 'Shop', available: false },
-                    { icon: 'hot_tub', label: 'Sauna', available: true }
-                ],
-                activities: [
-                    { icon: 'phishing', label: 'Angeln', desc: 'Gute Bedingungen für Fliegenfischen.', type: 'fishing' },
-                    { icon: 'hot_tub', label: 'Sauna', desc: 'Holzsauna an der Hütte.', type: 'sauna' }
-                ]
+                tags: [{ text: 'STF-Hütte', type: 'accommodation' }, { text: 'Sauna', type: 'activity' }],
+                gpxKey: 'vaisaluokta-kutjaure', gpxFrom: 'Vaisaluokta', gpxTo: 'Kutjaure'
             },
             {
                 id: 'laddejahka', name: 'Låddejåhkå', subtitle: 'Etappe 2',
                 coords: COORDS.laddejahka, type: 'trek', day: 'Tag 2', stageNum: 2,
-                icon: 'store', thumbnail: 'valley',
-                distance: 17, ascent: 460, descent: 480,
-                cumDistance: 34, cumAscent: 940, cumDescent: 850, elevation: 610,
-                details: 'Samische Hütte (Badjelánnda) mit kleinem Shop. Frischer Fisch erhältlich.',
+                distance: 17, ascent: 460, descent: 480, cumDistance: 34,
+                details: 'Spektakuläre Etappe mit drei Hängebrücken – die letzte ist 100 Meter lang! Von oben eröffnet sich der erste Blick auf den langgestreckten Vastenjaure. Samische Hütten mit Shop – frischer Fisch und Brot erhältlich.',
                 priceSEK: 1500,
-                link: 'https://padjelanta.com/stugor/laddejahka/',
                 tags: [{ text: 'Badjelánnda', type: 'accommodation' }, { text: 'Shop', type: 'food' }],
-                requirements: [
-                    { icon: 'hotel', label: 'Betten', available: true },
-                    { icon: 'restaurant', label: 'Küche', available: true },
-                    { icon: 'local_grocery_store', label: 'Shop', available: true },
-                    { icon: 'shower', label: 'Dusche', available: false }
-                ],
-                activities: [
-                    { icon: 'store', label: 'Proviant', desc: 'Pasta, Couscous, Schokolade, frischer Fisch.', type: 'food' },
-                    { icon: 'groups', label: 'Samische Kultur', desc: 'Die Hüttenwirte erzählen über Rentierzucht.', type: 'wildlife' }
-                ]
+                gpxKey: 'kutjaure-laddejahka', gpxFrom: 'Kutjaure', gpxTo: 'Låddejåhkå'
             },
             {
                 id: 'arasluokta', name: 'Árasluokta', subtitle: 'Etappe 3',
                 coords: COORDS.arasluokta, type: 'trek', day: 'Tag 3', stageNum: 3,
-                icon: 'store', thumbnail: 'mountains',
-                distance: 12, ascent: 410, descent: 410,
-                cumDistance: 46, cumAscent: 1350, cumDescent: 1260, elevation: 700,
-                details: 'Samische Hütte mit kleinem Shop und Kapelle.',
+                distance: 12, ascent: 410, descent: 410, cumDistance: 46,
+                details: 'Kürzere Etappe durch leichtes Gelände. Der Weg führt über eine Brücke über den Låddejåhkå mit tiefer Schlucht. Weite Ausblicke über den See Vásstenjávrre. Samische Siedlung mit Holzkapelle aus 1993.',
                 priceSEK: 1500,
-                link: 'https://padjelanta.com/stugor/arasluokta/',
-                tags: [{ text: 'Badjelánnda', type: 'accommodation' }, { text: 'Shop', type: 'food' }],
-                requirements: [
-                    { icon: 'hotel', label: 'Betten', available: true },
-                    { icon: 'restaurant', label: 'Küche', available: true },
-                    { icon: 'local_grocery_store', label: 'Shop', available: true },
-                    { icon: 'shower', label: 'Dusche', available: false }
-                ],
-                activities: [
-                    { icon: 'phishing', label: 'Angeln', desc: 'Gute Möglichkeiten in umliegenden Gewässern.', type: 'fishing' },
-                    { icon: 'photo_camera', label: 'Bergpanorama', desc: 'Blick auf umliegende Gipfel.', type: 'photography' }
-                ]
+                tags: [{ text: 'Badjelánnda', type: 'accommodation' }, { text: 'Kapelle', type: 'activity' }],
+                gpxKey: 'laddejahka-arasluokta', gpxFrom: 'Låddejåhkå', gpxTo: 'Árasluokta'
             },
             {
                 id: 'staloluokta', name: 'Stáloluokta', subtitle: 'Etappe 4',
                 coords: COORDS.staloluokta, type: 'trek', day: 'Tag 4', stageNum: 4,
-                icon: 'hot_tub', thumbnail: 'lake_big',
-                distance: 10, ascent: 300, descent: 280,
-                cumDistance: 56, cumAscent: 1650, cumDescent: 1540, elevation: 603,
-                details: 'Highlight! Am Virihaure – einem der schönsten Seen Schwedens. Sauna inklusive!',
+                distance: 10, ascent: 300, descent: 280, cumDistance: 56,
+                details: 'Die schönste Etappe! Grandioser Blick über den Virihaure – türkisfarbenes Gletscherwasser, norwegische Berge. Stáloluokta ist das Herz des Padjelanta – lebendige samische Siedlung mit Torfkoten und schönster Kotenkirche Schwedens. Kiosk, Sauna, Rentiere.',
                 priceSEK: 1600,
-                link: 'https://padjelanta.com/stugor/staloluokta/',
-                tags: [{ text: 'Badjelánnda', type: 'accommodation' }, { text: 'Kiosk', type: 'food' }, { text: 'Sauna', type: 'activity' }],
-                requirements: [
-                    { icon: 'hotel', label: 'Betten', available: true },
-                    { icon: 'restaurant', label: 'Küche', available: true },
-                    { icon: 'local_grocery_store', label: 'Kiosk', available: true },
-                    { icon: 'hot_tub', label: 'Sauna', available: true }
-                ],
-                activities: [
-                    { icon: 'hot_tub', label: 'Sauna am See', desc: 'Holzsauna mit Zugang zum Virihaure. Im Preis inklusive!', type: 'sauna' },
-                    { icon: 'pool', label: 'Schwimmen', desc: 'Türkisfarbenes Gletscherwasser (8-12°C).', type: 'swimming' },
-                    { icon: 'storefront', label: 'Kiosk', desc: 'Snacks, Getränke, Brot.', type: 'food' }
-                ]
+                tags: [{ text: 'Badjelánnda', type: 'accommodation' }, { text: '⭐ Highlight', type: 'activity' }, { text: 'Sauna', type: 'activity' }],
+                gpxKey: 'arasluokta-staloluokta', gpxFrom: 'Árasluokta', gpxTo: 'Stáloluokta'
             },
             {
                 id: 'staddajahka', name: 'Stáddajåhkå', subtitle: 'Etappe 5',
                 coords: COORDS.staddajahka, type: 'trek', day: 'Tag 5', stageNum: 5,
-                icon: 'landscape', thumbnail: 'peak',
-                distance: 12, ascent: 250, descent: 140,
-                cumDistance: 68, cumAscent: 1900, cumDescent: 1680, elevation: 705,
-                details: 'Ausgangspunkt für Gipfeltour auf den Jiegnáffo (1.700m).',
+                distance: 12, ascent: 250, descent: 140, cumDistance: 68,
+                details: 'Ab hier wird es einsamer. Route folgt dem Nordkalottleden Richtung Norwegen. Von hier aus: Gipfeltour auf den Jiegnáffo (1.700m) möglich – 1.000 Höhenmeter, 360°-Panorama über Padjelanta, Sarek und norwegische Gletscher!',
                 priceSEK: 1500,
-                link: 'https://padjelanta.com/stugor/staddajahka/',
-                tags: [{ text: 'Badjelánnda', type: 'accommodation' }, { text: '⭐ Gipfeltour!', type: 'activity' }],
-                requirements: [
-                    { icon: 'hotel', label: 'Betten', available: true },
-                    { icon: 'restaurant', label: 'Küche', available: true },
-                    { icon: 'local_grocery_store', label: 'Shop', available: true },
-                    { icon: 'shower', label: 'Dusche', available: false }
-                ],
-                activities: [
-                    { icon: 'terrain', label: 'Jiegnáffo (1.700m)', desc: '1.000 Höhenmeter Aufstieg. 360°-Panorama. 5-6 Stunden.', type: 'summit' },
-                    { icon: 'pets', label: 'Rentiere', desc: 'Weideland der Sami – oft Rentierherden zu sehen.', type: 'wildlife' }
-                ],
-                highlight: { title: 'Gipfeltour Jiegnáffo', desc: '1.000 Höhenmeter zum Gipfel – das Highlight!', coords: [67.30, 16.60] }
+                tags: [{ text: 'Badjelánnda', type: 'accommodation' }, { text: '⭐ Gipfeltour', type: 'activity' }],
+                gpxKey: 'staloluokta-staddajahka', gpxFrom: 'Stáloluokta', gpxTo: 'Stáddajåhkå'
             },
             {
                 id: 'sarjasjaure', name: 'Sårjåsjaure', subtitle: 'Etappe 6',
                 coords: COORDS.sarjasjaure, type: 'trek', day: 'Tag 6', stageNum: 6,
-                icon: 'auto_awesome', thumbnail: 'scenic',
-                distance: 6, ascent: 170, descent: 60,
-                cumDistance: 74, cumAscent: 2070, cumDescent: 1740, elevation: 820,
-                details: 'Kurze Etappe! Unbemannte STF-Hütte mit nur 8 Betten – unbedingt reservieren!',
+                distance: 6, ascent: 170, descent: 60, cumDistance: 74,
+                details: 'Kurze Etappe – ideal nach Gipfeltour. Mondähnliche Landschaft: weite Steinfelder, nur Moose und Flechten. Konsul Perssons Hütte liegt spektakulär am Rand eines Wasserfalls. Nur 8 Betten – absolute Stille der arktischen Wildnis.',
                 priceSEK: 1260,
-                link: 'https://www.swedishtouristassociation.com/facilities/stf-sarjasjaure-mountain-cabin/',
-                tags: [{ text: 'STF-Hütte', type: 'accommodation' }, { text: '⚠️ Nur 8 Betten!', type: 'booking' }],
-                requirements: [
-                    { icon: 'hotel', label: '8 Betten', available: true },
-                    { icon: 'restaurant', label: 'Küche', available: true },
-                    { icon: 'local_grocery_store', label: 'Shop', available: false },
-                    { icon: 'shower', label: 'Dusche', available: false }
-                ],
-                activities: [
-                    { icon: 'photo_camera', label: 'Sonnenuntergang', desc: 'Spektakuläre Abendstimmung über dem See.', type: 'photography' },
-                    { icon: 'self_improvement', label: 'Ruhe', desc: 'Einer der abgelegensten Orte – perfekt zum Entspannen.', type: 'hiking' }
-                ]
+                tags: [{ text: 'STF-Hütte', type: 'accommodation' }, { text: '⚠️ Nur 8 Betten', type: 'booking' }],
+                gpxKey: 'staddajahka-sarjasjaure', gpxFrom: 'Stáddajåhkå', gpxTo: 'Sårjåsjaure'
             },
             {
                 id: 'sorjushytta', name: 'Sorjushytta', subtitle: 'Etappe 7 – Norwegen!',
                 coords: COORDS.sorjushytta, type: 'trek', day: 'Tag 7', stageNum: 7,
-                icon: 'flag', thumbnail: 'border',
-                distance: 12, ascent: 190, descent: 180,
-                cumDistance: 86, cumAscent: 2260, cumDescent: 1920, elevation: 850,
-                details: 'Grenzübertritt nach Norwegen! DNT-Hütte mit 12 Betten.',
+                distance: 12, ascent: 190, descent: 180, cumDistance: 86,
+                details: 'Grenzübertritt nach Norwegen! Hochgebirgslandschaft auf über 900m. Blick auf das Sulitelma-Massiv mit Gletschern. Unbemannte DNT-Hütte (Schlüssel erforderlich). Kein Handynetz, kein fließend Wasser – pure Wildnis am Ende der Welt.',
                 priceNOK: 650,
-                link: 'https://ut.no/hytte/sorjushytta',
-                tags: [{ text: 'DNT-Hütte', type: 'accommodation' }, { text: '🇳🇴 Norwegen', type: 'activity' }],
-                requirements: [
-                    { icon: 'hotel', label: '12 Betten', available: true },
-                    { icon: 'restaurant', label: 'Küche', available: true },
-                    { icon: 'local_grocery_store', label: 'Shop', available: false },
-                    { icon: 'shower', label: 'Dusche', available: false }
-                ],
-                activities: [
-                    { icon: 'terrain', label: 'Aussichtsgipfel', desc: 'Panorama auf das Sulitelma-Massiv und Gletscher.', type: 'summit' },
-                    { icon: 'public', label: 'Grenzübertritt', desc: 'Wechsel von Schweden nach Norwegen.', type: 'hiking' }
-                ]
+                tags: [{ text: 'DNT-Hütte', type: 'accommodation' }, { text: '🇳🇴 Grenze', type: 'activity' }],
+                gpxKey: 'sarjasjaure-sorjushytta', gpxFrom: 'Sårjåsjaure', gpxTo: 'Sorjushytta'
             },
             {
                 id: 'nysulitjelma', name: 'Ny Sulitjelma', subtitle: 'Etappe 8 – Ziel!',
                 coords: COORDS.nysulitjelma, type: 'trek', day: 'Tag 8', stageNum: 8,
-                icon: 'emoji_events', thumbnail: 'finish',
-                distance: 11, ascent: 390, descent: 630,
-                cumDistance: 97, cumAscent: 2650, cumDescent: 2550, elevation: 450,
-                details: 'Geschafft! DNT-Hütte mit Strom und fließend Wasser. Bus nach Fauske.',
+                distance: 11, ascent: 390, descent: 630, cumDistance: 97,
+                details: 'Letzte Etappe: Steil hinauf auf über 1.000m in mondähnliche Hochgebirgslandschaft. Höchster Punkt der Tour! Steiler Abstieg zur Ny-Sulitjelma Fjellstue mit Strom und fließend Wasser. Spuren des historischen Bergbaus. Bus nach Fauske. Geschafft!',
                 priceNOK: 650,
-                link: 'https://hyttebestilling.dnt.no/hytte/10955',
                 tags: [{ text: 'DNT-Hütte', type: 'accommodation' }, { text: '🏆 Ziel!', type: 'activity' }],
-                requirements: [
-                    { icon: 'hotel', label: '29 Betten', available: true },
-                    { icon: 'restaurant', label: 'Küche', available: true },
-                    { icon: 'local_grocery_store', label: 'Shop', available: false },
-                    { icon: 'shower', label: 'Dusche', available: false }
-                ],
-                activities: [
-                    { icon: 'celebration', label: 'Feiern!', desc: '97 km und 2.650 Höhenmeter geschafft!', type: 'hiking' },
-                    { icon: 'directions_bus', label: 'Bus', desc: 'Verbindung nach Fauske/Bodø.', type: 'transport' }
-                ]
+                gpxKey: 'sorjushytta-nysulitjelma', gpxFrom: 'Sorjushytta', gpxTo: 'Ny Sulitjelma'
             }
         ];
 
         const transportDeparture = [
             {
-                id: 'fauske', name: 'Fauske / Bodø', subtitle: 'Busverbindung',
+                id: 'fauske', name: 'Fauske / Bodø', subtitle: 'Bus & Zug',
                 coords: COORDS.fauske, type: 'transport', day: 'Abreise',
-                icon: 'directions_bus', thumbnail: 'bus',
-                details: 'Bus nach Fauske. Von dort Zug nach Oslo oder Narvik.',
-                tags: [{ text: 'Bus', type: 'transport' }, { text: 'Zug', type: 'transport' }],
-                requirements: [], activities: []
-            },
-            {
-                id: 'return-stockholm', name: 'Stockholm', subtitle: 'Rückkehr',
-                coords: COORDS.stockholm, type: 'transport', day: 'Abreise',
-                icon: 'home', thumbnail: 'city',
-                details: 'Zug Fauske → Oslo → Stockholm (ca. 14h).',
-                tags: [{ text: 'Zug', type: 'transport' }],
-                requirements: [], activities: []
+                details: 'Bus nach Fauske. Anschluss an Nordlandbahn nach Bodø oder Trondheim. Weiter nach Oslo oder mit Fähre zu den Lofoten.',
+                tags: [{ text: 'Bus', type: 'transport' }, { text: 'Nordlandbahn', type: 'transport' }]
             }
         ];
 
-        const thumbnailIcons = {
-            'city': 'location_city', 'transfer': 'connecting_airports', 'cabin': 'cottage',
-            'start': 'flag', 'lake': 'water', 'valley': 'valley', 'mountains': 'terrain',
-            'lake_big': 'waves', 'peak': 'landscape', 'scenic': 'auto_awesome',
-            'border': 'public', 'finish': 'emoji_events', 'bus': 'directions_bus'
-        };
-
-        // Map setup with Carto Voyager
-        const map = L.map('map', { center: [67.35, 16.7], zoom: 9, zoomControl: true });
-
-        const cartoVoyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd', maxZoom: 19
+        // Map setup
+        const map = L.map('map', { 
+            center: [67.4, 16.8], 
+            zoom: 9,
+            zoomControl: true
         });
 
-        const openTopo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OSM</a> | <a href="http://opentopomap.org">OpenTopoMap</a>',
-            maxZoom: 17
-        });
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OSM © CARTO',
+            maxZoom: 19
+        }).addTo(map);
 
-        cartoVoyager.addTo(map);
-        L.control.layers({ "Standard": cartoVoyager, "Topografisch": openTopo }, null, { position: 'topright' }).addTo(map);
-
-        function createNumberedMarker(num, type) {
-            return L.divIcon({
-                className: `custom-marker ${type} numbered`,
-                html: `<span>${num}</span>`,
-                iconSize: [24, 24], iconAnchor: [12, 12]
-            });
-        }
-
-        function createMarkerIcon(type, isStart = false) {
-            return L.divIcon({
-                className: isStart ? 'custom-marker start' : `custom-marker ${type}`,
-                iconSize: isStart ? [20, 20] : [14, 14],
-                iconAnchor: isStart ? [10, 10] : [7, 7]
-            });
-        }
+        // Move zoom control to avoid header overlap
+        map.zoomControl.setPosition('topleft');
 
         // Draw routes
-        const arrivalCoords = transportArrival.map(p => p.coords);
-        const departureCoords = [trekStages[trekStages.length - 1].coords, ...transportDeparture.map(p => p.coords)];
-
-        L.polyline(arrivalCoords, { color: '#1a73e8', weight: 3, dashArray: '8, 8', opacity: 0.8 }).addTo(map);
-        L.polyline(detailedTrekRoute, { color: '#0d652d', weight: 4, opacity: 0.9 }).addTo(map);
-        L.polyline(departureCoords, { color: '#1a73e8', weight: 3, dashArray: '8, 8', opacity: 0.8 }).addTo(map);
+        L.polyline(transportArrival.map(p => p.coords), { 
+            color: '#1a73e8', weight: 2, dashArray: '6, 6', opacity: 0.7 
+        }).addTo(map);
+        
+        L.polyline(detailedTrekRoute, { 
+            color: '#0d652d', weight: 3, opacity: 0.9 
+        }).addTo(map);
+        
+        // Departure route: Ny Sulitjelma -> Fauske -> Stockholm
+        L.polyline([COORDS.nysulitjelma, COORDS.fauske], { 
+            color: '#1a73e8', weight: 2, dashArray: '6, 6', opacity: 0.7 
+        }).addTo(map);
+        
+        L.polyline([COORDS.fauske, [65.0, 17.5], [63.0, 18.0], COORDS.stockholm], { 
+            color: '#1a73e8', weight: 2, dashArray: '6, 6', opacity: 0.7 
+        }).addTo(map);
 
         const markers = {};
 
-        function updateProgress(point) {
-            if (point.cumDistance !== undefined) {
-                document.getElementById('progressValue').textContent = `${point.cumDistance} / 97 km`;
-                document.getElementById('progressFill').style.width = `${(point.cumDistance / 97) * 100}%`;
-                document.getElementById('progressHmUp').textContent = `↑ ${point.cumAscent.toLocaleString()} / 2.650 hm`;
-                document.getElementById('progressHmDown').textContent = `↓ ${point.cumDescent.toLocaleString()} / 2.550 hm`;
-                showElevationMarker(point.cumDistance);
+        function createMarker(num, type) {
+            if (num !== null && num > 0) {
+                return L.divIcon({
+                    className: `custom-marker ${type} numbered`,
+                    html: `<span>${num}</span>`,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                });
             }
+            return L.divIcon({
+                className: `custom-marker ${type}`,
+                iconSize: [10, 10],
+                iconAnchor: [5, 5]
+            });
         }
 
         function createCard(point, container) {
@@ -1176,105 +1064,87 @@
             card.className = `waypoint-card ${point.type}`;
             card.dataset.id = point.id;
 
-            const thumbClass = point.type === 'trek' ? 'trek-thumb' : 'transport-thumb';
-            const thumbIcon = thumbnailIcons[point.thumbnail] || point.icon || 'place';
+            let statsHTML = point.distance > 0 ? `
+                <div class="card-stats">
+                    <div class="stat-badge"><span class="material-symbols-outlined" style="color:#1a73e8">straighten</span>${point.distance} km</div>
+                    <div class="stat-badge"><span class="material-symbols-outlined" style="color:#0d652d">trending_up</span>${point.ascent} hm</div>
+                    <div class="stat-badge"><span class="material-symbols-outlined" style="color:#e8710a">trending_down</span>${point.descent} hm</div>
+                </div>` : '';
 
-            let statsHTML = '';
-            if (point.distance !== undefined && point.distance > 0) {
-                statsHTML = `<div class="card-stats">
-                    <div class="stat-badge distance"><span class="material-symbols-outlined">straighten</span><span>${point.distance} km</span></div>
-                    <div class="stat-badge ascent"><span class="material-symbols-outlined">trending_up</span><span>${point.ascent} hm</span></div>
-                    <div class="stat-badge descent"><span class="material-symbols-outlined">trending_down</span><span>${point.descent} hm</span></div>
-                </div>`;
-            }
+            let coordsHTML = `<div class="card-coords"><span class="material-symbols-outlined">location_on</span>${formatCoords(point.coords)}</div>`;
 
-            let progressHTML = point.cumDistance !== undefined ? `<div class="card-progress"><span class="material-symbols-outlined">check_circle</span>${point.cumDistance} km / ${point.cumAscent.toLocaleString()} hm erreicht</div>` : '';
+            let gpxBtnHTML = point.gpxKey ? `
+                <button class="gpx-btn" onclick="event.stopPropagation(); downloadGPX('${point.gpxKey}', '${point.gpxFrom}', '${point.gpxTo}')">
+                    <span class="material-symbols-outlined">download</span>GPX
+                </button>` : '';
 
-            let requirementsHTML = point.requirements && point.requirements.length > 0 ? `<div class="card-requirements">${point.requirements.map(req => `<div class="requirement ${req.available ? 'available' : ''}"><span class="material-symbols-outlined">${req.icon}</span><span>${req.label}</span></div>`).join('')}</div>` : '';
+            let priceHTML = point.priceSEK ? `<span class="price-badge">${formatPrice(point.priceSEK)}/Nacht</span>` : 
+                           (point.priceNOK ? `<span class="price-badge">${formatPrice(null, point.priceNOK)}/Nacht</span>` : '');
 
-            let tagsHTML = point.tags.map(tag => `<span class="tag ${tag.type}">${tag.text}</span>`).join('');
-
-            let priceHTML = '';
-            if (point.priceSEK) priceHTML = `<div class="price-badge"><span class="material-symbols-outlined">euro</span>${formatPrice(point.priceSEK, null)} / Familie</div>`;
-            else if (point.priceNOK) priceHTML = `<div class="price-badge"><span class="material-symbols-outlined">euro</span>${formatPrice(null, point.priceNOK)} / Familie</div>`;
-
-            let accordionHTML = '';
-            if (point.activities && point.activities.length > 0) {
-                accordionHTML = `<div class="card-accordion">
-                    <div class="accordion-header" onclick="toggleAccordion(this, event)">
-                        <span><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 4px;">explore</span> Aktivitäten & Details</span>
-                        <span class="material-symbols-outlined">expand_more</span>
+            card.innerHTML = `
+                <div class="card-main">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">${point.name}</div>
+                            <div class="card-subtitle">${point.subtitle}</div>
+                        </div>
+                        <div class="card-day ${point.type}">${point.day}</div>
                     </div>
-                    <div class="accordion-content">
-                        <div class="accordion-inner">
-                            ${point.activities.map(act => `<div class="activity-item"><div class="activity-icon ${act.type}"><span class="material-symbols-outlined">${act.icon}</span></div><div class="activity-content"><div class="activity-title">${act.label}</div><div class="activity-desc">${act.desc}</div></div></div>`).join('')}
-                            ${point.highlight ? `<div style="margin-top: 0.75rem; padding: 0.75rem; background: #fff3e0; border-radius: 12px; border-left: 4px solid #e65100;"><div style="font-weight: 500; font-size: 0.875rem; color: #e65100;"><span class="material-symbols-outlined" style="font-size: 20px;">star</span> ${point.highlight.title}</div><div style="font-size: 0.8125rem; color: #5f6368; margin-top: 0.375rem;">${point.highlight.desc}</div></div>` : ''}
-                            ${point.link ? `<a href="${point.link}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.375rem; margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.8125rem; color: white; background: var(--md-primary); text-decoration: none; border-radius: 100px;"><span class="material-symbols-outlined" style="font-size: 18px;">open_in_new</span>Hütte buchen</a>` : ''}
+                    ${statsHTML}
+                    <div class="card-details">${point.details}</div>
+                    ${coordsHTML}
+                    <div class="card-footer">
+                        <div class="card-tags">${point.tags.map(t => `<span class="tag ${t.type}">${t.text}</span>`).join('')}</div>
+                        <div style="display:flex;align-items:center;gap:0.5rem">
+                            ${priceHTML}
+                            ${gpxBtnHTML}
                         </div>
                     </div>
                 </div>`;
-            }
 
-            card.innerHTML = `<div class="card-main">
-                <div class="card-header">
-                    <div class="card-thumbnail ${thumbClass}"><span class="material-symbols-outlined">${thumbIcon}</span></div>
-                    <div class="card-info">
-                        <div class="card-title-row"><div class="card-title">${point.name}</div><div class="card-day ${point.type}">${point.day}</div></div>
-                        <div class="card-subtitle">${point.subtitle}</div>
-                        ${progressHTML}
-                    </div>
-                </div>
-                ${statsHTML}
-                <div class="card-details">${point.details}</div>
-                ${requirementsHTML}
-                <div class="card-tags">${tagsHTML}</div>
-                ${priceHTML}
-            </div>${accordionHTML}`;
-
-            card.querySelector('.card-main').addEventListener('click', () => {
+            card.addEventListener('click', () => {
                 document.querySelectorAll('.waypoint-card').forEach(c => c.classList.remove('active'));
                 card.classList.add('active');
-                map.flyTo(point.coords, 11, { duration: 0.8 });
-                markers[point.id].openPopup();
-                updateProgress(point);
+                
+                // Pan without zoom change
+                map.panTo(point.coords, { animate: true, duration: 0.5 });
+                if (markers[point.id]) markers[point.id].openPopup();
+                
+                // Update slider
+                if (point.stageNum !== undefined) {
+                    document.getElementById('daySlider').value = point.stageNum;
+                    updateSlider(point.stageNum, false, false);
+                }
             });
 
             container.appendChild(card);
         }
 
-        window.toggleAccordion = function(header, event) {
-            event.stopPropagation();
-            header.classList.toggle('open');
-            header.nextElementSibling.classList.toggle('open');
-        };
-
-        function addMarker(point, isStart = false, stageNum = null) {
-            const icon = stageNum !== null && stageNum > 0 ? createNumberedMarker(stageNum, point.type) : createMarkerIcon(point.type, isStart);
+        function addMarker(point, stageNum = null) {
+            const icon = createMarker(stageNum, point.type);
             const marker = L.marker(point.coords, { icon }).addTo(map);
 
-            let priceStr = point.priceSEK ? formatPrice(point.priceSEK, null) : (point.priceNOK ? formatPrice(null, point.priceNOK) : '');
-
-            marker.bindPopup(`<div class="popup-content">
-                <div class="popup-title">${point.name}</div>
-                <div class="popup-subtitle">${point.subtitle}</div>
-                ${point.distance ? `<div class="popup-stats"><div class="popup-stat"><span class="material-symbols-outlined" style="color: #1a73e8;">straighten</span>${point.distance} km</div><div class="popup-stat"><span class="material-symbols-outlined" style="color: #0d652d;">trending_up</span>${point.ascent} hm</div></div>` : ''}
-                ${priceStr ? `<div style="margin-top: 0.5rem; color: #0d652d; font-weight: 500;">${priceStr} / Familie</div>` : ''}
-            </div>`, { offset: [0, -5] });
+            marker.bindPopup(`
+                <div style="font-weight:500;margin-bottom:4px">${point.name}</div>
+                <div style="font-size:11px;color:#5f6368">${point.subtitle}</div>
+                ${point.distance ? `<div style="font-size:10px;margin-top:4px">${point.distance} km · ↑${point.ascent}hm</div>` : ''}
+            `, { offset: [0, -5] });
 
             marker.on('click', () => {
-                document.querySelectorAll('.waypoint-card').forEach(c => c.classList.remove('active'));
                 const card = document.querySelector(`[data-id="${point.id}"]`);
-                if (card) { card.classList.add('active'); card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-                updateProgress(point);
+                if (card) {
+                    document.querySelectorAll('.waypoint-card').forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    if (point.stageNum !== undefined) {
+                        document.getElementById('daySlider').value = point.stageNum;
+                        updateSlider(point.stageNum, false, false);
+                    }
+                }
             });
 
             markers[point.id] = marker;
-
-            if (point.highlight && point.highlight.coords) {
-                L.marker(point.highlight.coords, {
-                    icon: L.divIcon({ className: 'custom-marker', html: '<span class="material-symbols-outlined" style="color: #e65100; font-size: 24px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));">star</span>', iconSize: [24, 24], iconAnchor: [12, 12] })
-                }).addTo(map).bindPopup(`<div class="popup-content"><div class="popup-title" style="color: #e65100;">⭐ ${point.highlight.title}</div><div class="popup-subtitle">${point.highlight.desc}</div></div>`);
-            }
         }
 
         // Build UI
@@ -1282,45 +1152,21 @@
         const trekContainer = document.getElementById('trek-stages');
         const departureContainer = document.getElementById('transport-departure');
 
-        transportArrival.forEach((point, i) => { createCard(point, arrivalContainer); addMarker(point, i === 0); });
-        trekStages.forEach(point => { createCard(point, trekContainer); addMarker(point, false, point.stageNum); });
-        transportDeparture.forEach(point => { createCard(point, departureContainer); if (point.id !== 'return-stockholm') addMarker(point); });
+        transportArrival.forEach(p => { createCard(p, arrivalContainer); addMarker(p); });
+        trekStages.forEach(p => { createCard(p, trekContainer); addMarker(p, p.stageNum); });
+        transportDeparture.forEach(p => { createCard(p, departureContainer); addMarker(p); });
 
         // Fit bounds
         map.fitBounds(trekStages.map(p => p.coords), { padding: [50, 50] });
+        currentZoom = map.getZoom();
 
-        // Elevation chart interaction
-        const elevChart = document.getElementById('elevationChart');
-        elevChart.addEventListener('mousemove', (e) => {
-            const rect = elevChart.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const percent = x / rect.width;
-            const km = Math.round(percent * maxKm);
-            const closest = elevationData.reduce((prev, curr) => Math.abs(curr.km - km) < Math.abs(prev.km - km) ? curr : prev);
-            const yPercent = (closest.elev - minElev) / (maxElev - minElev);
-            const yPos = 80 - (yPercent * 70 + 5);
-            
-            document.getElementById('elevMarker').style.display = 'block';
-            document.getElementById('elevMarker').style.left = `${x}px`;
-            document.getElementById('elevTooltip').textContent = `${closest.km} km · ${closest.elev}m`;
-            document.getElementById('elevPoint').style.display = 'block';
-            document.getElementById('elevPoint').style.left = `${x}px`;
-            document.getElementById('elevPoint').style.top = `${yPos}px`;
-        });
+        // Initialize
+        updateSlider(1, false, false);
 
-        elevChart.addEventListener('mouseleave', () => {
-            if (!document.querySelector('.waypoint-card.active')) {
-                document.getElementById('elevMarker').style.display = 'none';
-                document.getElementById('elevPoint').style.display = 'none';
-            }
-        });
-
-        document.querySelectorAll('.stage-dot').forEach(dot => {
-            dot.addEventListener('click', (e) => {
-                const card = document.querySelector(`[data-id="${e.target.dataset.stage}"]`);
-                if (card) card.querySelector('.card-main').click();
-            });
-        });
+        // Collapse on mobile by default
+        if (window.innerWidth <= 900) {
+            document.getElementById('progressCard').classList.add('collapsed');
+        }
     });
     </script>
 </body>
