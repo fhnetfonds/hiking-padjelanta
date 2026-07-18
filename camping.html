@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interaktiver Reise-Kalender für den Campervan-Roadtrip Hamburg nach Stockholm im Juli 2026.">
+  <title>Hamburg nach Stockholm | Reise-Kalender</title>
+  <link rel="preconnect" href="https://maps.google.com">
+  <style>
+    :root {
+      --ink: #173a33;
+      --deep: #102d27;
+      --muted: #667871;
+      --paper: #f5f1e8;
+      --card: #fffdf8;
+      --line: #ddd9cc;
+      --green: #2f7655;
+      --blue: #247b9b;
+      --orange: #dc863b;
+      --purple: #6f58a4;
+      --red: #a84f42;
+      --shadow: 0 15px 38px rgba(26, 55, 47, .10);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 92% 0, rgba(36,123,155,.13), transparent 30rem),
+        radial-gradient(circle at 0 42%, rgba(220,134,59,.11), transparent 25rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    button, input { font: inherit; }
+    a { color: #176684; text-underline-offset: 3px; }
+    .shell { width: min(1320px, calc(100% - 30px)); margin: 0 auto; }
+
+    header { padding: 38px 0 25px; }
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      color: var(--green);
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--orange); }
+    h1 {
+      max-width: 900px;
+      margin: 0;
+      color: var(--deep);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.5rem, 5.8vw, 5.2rem);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: .98;
+    }
+    .lead-row { display: flex; justify-content: space-between; gap: 28px; align-items: end; margin-top: 20px; }
+    .lead { max-width: 760px; margin: 0; color: #52675f; font-size: 1.02rem; }
+    .facts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+    .fact { padding: 7px 11px; border: 1px solid rgba(47,118,85,.25); border-radius: 999px; background: rgba(255,253,248,.78); font-size: .74rem; font-weight: 800; white-space: nowrap; }
+
+    .toolbar {
+      position: sticky;
+      z-index: 100;
+      top: 0;
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      overflow-x: auto;
+      padding: 11px 0;
+      background: linear-gradient(var(--paper) 80%, rgba(245,241,232,0));
+      scrollbar-width: none;
+    }
+    .toolbar::-webkit-scrollbar { display: none; }
+    .chip {
+      flex: 0 0 auto;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid #cdd3cb;
+      border-radius: 999px;
+      background: rgba(255,253,248,.94);
+      color: #50645d;
+      cursor: pointer;
+      font-size: .73rem;
+      font-weight: 850;
+    }
+    .chip.active { border-color: var(--deep); background: var(--deep); color: white; }
+    .chip.utility { margin-left: auto; border-style: dashed; }
+    .hidden-count { flex: 0 0 auto; color: var(--muted); font-size: .7rem; font-weight: 750; }
+
+    .day-tabs {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      overflow: hidden;
+      margin: 4px 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,253,248,.74);
+      box-shadow: var(--shadow);
+    }
+    .day-tab {
+      min-width: 0;
+      padding: 13px 14px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+    }
+    .day-tab:last-child { border-right: 0; }
+    .day-tab.active { background: var(--deep); color: white; }
+    .day-tab span, .day-tab strong { display: block; }
+    .day-tab .date { color: var(--orange); font-size: .64rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .day-tab .region { overflow: hidden; margin: 2px 0; font-family: Georgia, serif; font-size: 1rem; text-overflow: ellipsis; white-space: nowrap; }
+    .day-tab .weather-mini { color: var(--muted); font-size: .67rem; }
+    .day-tab.active .weather-mini { color: #c4d5cf; }
+
+    .planner { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(340px, .7fr); gap: 17px; align-items: start; }
+    .calendar-panel, .map-panel { min-width: 0; }
+    .day-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 17px 19px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+    }
+    .day-heading h2 { margin: 0; color: var(--deep); font-family: Georgia, serif; font-size: clamp(1.55rem, 3vw, 2.25rem); font-weight: 500; }
+    .day-heading p { max-width: 650px; margin: 4px 0 0; color: var(--muted); font-size: .78rem; }
+    .day-weather { flex: 0 0 auto; padding: 9px 12px; border-radius: 12px; background: #edf3ee; text-align: center; }
+    .day-weather strong, .day-weather span { display: block; }
+    .day-weather strong { font-size: 1.05rem; }
+    .day-weather span { color: var(--muted); font-size: .62rem; }
+
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+    .place-card {
+      position: relative;
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+      box-shadow: 0 4px 14px rgba(25,52,45,.05);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .place-card:hover { transform: translateY(-2px); }
+    .place-card.top { border-color: rgba(47,118,85,.54); }
+    .place-card.creative { background: linear-gradient(145deg, #fffdf8, #f3f8f2); }
+    .place-card.emergency { border-style: dashed; background: #f5f3ee; }
+    .place-card.excluded { opacity: .42; filter: grayscale(.65); }
+    .card-head { display: flex; gap: 10px; align-items: start; }
+    .marker-number {
+      display: grid;
+      flex: 0 0 29px;
+      width: 29px;
+      height: 29px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green);
+      color: white;
+      font-size: .69rem;
+      font-weight: 900;
+    }
+    .emergency .marker-number { background: var(--orange); }
+    .title-wrap { min-width: 0; flex: 1; }
+    .title-wrap h3 { margin: 0; color: var(--deep); font-family: Georgia, serif; font-size: 1.14rem; line-height: 1.15; }
+    .location { display: block; margin-top: 2px; color: var(--muted); font-size: .69rem; }
+    .exclude-btn {
+      flex: 0 0 auto;
+      width: 29px;
+      height: 29px;
+      border: 1px solid #d4d7d0;
+      border-radius: 50%;
+      background: white;
+      color: #78847f;
+      cursor: pointer;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .exclude-btn:hover { border-color: var(--red); color: var(--red); }
+    .badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 9px; }
+    .badge { padding: 3px 7px; border-radius: 999px; background: #eaf1eb; color: #426456; font-size: .6rem; font-weight: 900; }
+    .badge.creative { background: #e8edf8; color: #54699c; }
+    .badge.free { background: #fff0df; color: #a15d23; }
+    .badge.emergency { background: #f4e5dd; color: #944f42; }
+    .badge.city { background: #eee9f7; color: #655096; }
+    .description { margin: 0 0 10px; color: #53665f; font-size: .78rem; }
+    .weather-row { display: flex; gap: 9px; align-items: center; margin: 0 0 10px; padding: 8px 10px; border-radius: 11px; background: #f0f4f0; }
+    .weather-row .icon { font-size: 1.2rem; }
+    .weather-row strong, .weather-row span { display: block; }
+    .weather-row strong { font-size: .73rem; }
+    .weather-row span { color: var(--muted); font-size: .61rem; }
+    .travel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 11px; }
+    .travel div { min-width: 0; padding: 7px; border: 1px solid #e4e1d8; border-radius: 9px; background: white; }
+    .travel span, .travel strong { display: block; }
+    .travel span { color: var(--muted); font-size: .55rem; line-height: 1.18; }
+    .travel strong { margin-top: 3px; color: var(--deep); font-size: .72rem; }
+    .notes { margin-top: auto; padding-top: 9px; border-top: 1px solid #e9e6dd; color: #586a64; font-size: .68rem; }
+    .notes strong { color: var(--ink); }
+    .links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      min-height: 31px;
+      padding: 6px 9px;
+      border: 1px solid #ccd5cf;
+      border-radius: 9px;
+      color: #2f604f;
+      font-size: .65rem;
+      font-weight: 850;
+      text-decoration: none;
+    }
+    .link-btn:hover { border-color: var(--green); background: #f2f7f3; }
+
+    .map-panel {
+      position: sticky;
+      top: 58px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .map-head { display: flex; justify-content: space-between; gap: 12px; padding: 14px 15px; border-bottom: 1px solid var(--line); }
+    .map-head strong, .map-head span { display: block; }
+    .map-head strong { font-size: .82rem; }
+    .map-head span { color: var(--muted); font-size: .63rem; }
+    .maps-link { flex: 0 0 auto; align-self: center; padding: 7px 10px; border-radius: 999px; background: var(--deep); color: white; font-size: .63rem; font-weight: 850; text-decoration: none; }
+    .schematic { position: relative; height: 320px; overflow: hidden; background: linear-gradient(160deg, #e8f0e9, #edf3f4 65%, #f8f4e9); }
+    #routeSvg { display: block; width: 100%; height: 100%; }
+    .map-label { font-size: 12px; fill: #60746d; font-weight: 700; }
+    .map-route { fill: none; stroke: #6d8b80; stroke-width: 4; stroke-dasharray: 8 8; opacity: .55; }
+    .map-marker { cursor: pointer; transition: opacity .18s ease; }
+    .map-marker circle { stroke: white; stroke-width: 3; filter: drop-shadow(0 2px 3px rgba(20,48,40,.25)); }
+    .map-marker text { fill: white; font-size: 9px; font-weight: 900; text-anchor: middle; pointer-events: none; }
+    .map-marker.excluded { opacity: .22; }
+    .selected-spot { padding: 13px 15px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .selected-spot .selection-label { color: var(--orange); font-size: .57rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .selected-spot h3 { margin: 3px 0; font-family: Georgia, serif; font-size: 1.1rem; }
+    .selected-spot p { margin: 0; color: var(--muted); font-size: .67rem; }
+    #googleMap { display: block; width: 100%; height: 230px; border: 0; }
+    .map-help { padding: 8px 13px; color: var(--muted); font-size: .59rem; text-align: center; }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 18px 0 42px; color: var(--muted); font-size: .67rem; }
+    .legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; background: var(--green); }
+    .legend .creative-key::before { background: var(--blue); }
+    .legend .emergency-key::before { background: var(--orange); }
+    .legend .excluded-key::before { background: #aaa; }
+    .legal { display: grid; grid-template-columns: .7fr 1.3fr; gap: 35px; margin: 45px 0; padding: 27px; border-radius: 20px; background: var(--deep); color: white; }
+    .legal h2 { margin: 0; font-family: Georgia, serif; font-size: 1.8rem; font-weight: 500; }
+    .legal ul { margin: 0; padding-left: 18px; color: #c8d6d1; font-size: .76rem; }
+    .legal li + li { margin-top: 7px; }
+    footer { padding: 0 0 35px; color: #71807a; font-size: .68rem; }
+
+    @media (max-width: 1040px) {
+      .planner { grid-template-columns: 1fr; }
+      .map-panel { position: static; display: block; }
+      .schematic { height: 390px; }
+      .selected-spot { border-top: 1px solid var(--line); }
+      #googleMap { height: 300px; }
+    }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 18px, 1320px); }
+      header { padding-top: 28px; }
+      .lead-row { align-items: start; flex-direction: column; }
+      .facts { justify-content: flex-start; }
+      .day-tabs { display: flex; overflow-x: auto; }
+      .day-tab { flex: 0 0 145px; border-bottom: 0; }
+      .cards { grid-template-columns: 1fr; }
+      .map-panel { display: block; }
+      .schematic { height: 330px; }
+      .selected-spot { border-top: 1px solid var(--line); }
+      .legal { grid-template-columns: 1fr; gap: 14px; }
+      .chip.utility { margin-left: 0; }
+    }
+    @media (max-width: 470px) {
+      .day-heading { align-items: start; }
+      .travel { grid-template-columns: 1fr 1fr 1fr; }
+      .map-head { align-items: start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="shell">
+    <div class="eyebrow">Hamburg - Stockholm · 19. bis 24. Juli 2026</div>
+    <h1>Euer Reise-Kalender für die guten Stopps.</h1>
+    <div class="lead-row">
+      <p class="lead">Klar nach Reisetagen sortiert, mit Wetter am geplanten Tag, Fahrzeiten, kreativen Alternativen und einer eigenen Auswahl. Klickt auf das ×, um Plätze auszuklammern. Die Auswahl bleibt auf diesem Gerät gespeichert.</p>
+      <div class="facts"><span class="fact" id="optionFact">23 Optionen</span><span class="fact">5 Reisetage</span><span class="fact">VW T5 Hochdach</span></div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="toolbar" aria-label="Optionen filtern">
+      <button class="chip active" data-filter="all">Alle</button>
+      <button class="chip" data-filter="top">Favoriten</button>
+      <button class="chip" data-filter="creative">Kreativ & klein</button>
+      <button class="chip" data-filter="free">Gratis</button>
+      <button class="chip" data-filter="city">Stadtnah</button>
+      <button class="chip" data-filter="emergency">Nur Notoptionen</button>
+      <button class="chip utility" id="showExcluded">Ausgeklammerte zeigen</button>
+      <button class="chip" id="resetExcluded">Auswahl zurücksetzen</button>
+      <span class="hidden-count" id="hiddenCount"></span>
+    </nav>
+
+    <nav class="day-tabs" id="dayTabs" aria-label="Reisetag wählen"></nav>
+
+    <div class="planner">
+      <section class="calendar-panel" aria-live="polite">
+        <div class="day-heading" id="dayHeading"></div>
+        <div class="cards" id="cards"></div>
+      </section>
+
+      <aside class="map-panel" id="map" aria-label="Karte und Google Maps">
+        <div class="map-head">
+          <div><strong>Schematische Tageskarte</strong><span>Marker anklicken, dann öffnet sich der Spot unten.</span></div>
+          <a class="maps-link" id="fullRouteLink" href="https://www.google.com/maps/dir/?api=1&amp;origin=Hamburg%2CGermany&amp;destination=Stockholm%2CSweden&amp;travelmode=driving&amp;waypoints=Kolding%2CDenmark%7COdense%2CDenmark%7CMalmo%2CSweden" target="_blank" rel="noopener">Gesamtroute ↗</a>
+        </div>
+        <div class="schematic"><svg id="routeSvg" viewBox="0 0 480 620" role="img" aria-label="Schematische Route Hamburg nach Stockholm"></svg></div>
+        <div class="selected-spot" id="selectedSpot"></div>
+        <iframe id="googleMap" title="Ausgewählter Platz in Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="map-help">Die Skizze dient der Übersicht. Für exakte Strecke und aktuelle Verkehrslage den Google-Maps-Link nutzen.</div>
+      </aside>
+    </div>
+
+    <div class="legend">
+      <span>reguläre Option</span><span class="creative-key">kreativ oder sehr klein</span><span class="emergency-key">Notoption</span><span class="excluded-key">ausgeklammert</span>
+    </div>
+
+    <section class="legal">
+      <div><div class="eyebrow">Kurz und wichtig</div><h2>Parkplatz bleibt Parkplatz.</h2></div>
+      <ul>
+        <li>Community-Einträge von park4night und Campspace können sich kurzfristig ändern. Vor Ort gelten immer Schilder und Hinweise der Eigentümer.</li>
+        <li>Bei Gratisparkplätzen im Fahrzeug schlafen, aber keine Markise, Stühle, Grill oder Keile herausstellen.</li>
+        <li>Bellahøj ist die einzige Kopenhagenoption in dieser Auswahl.</li>
+        <li>E4:ans Vidöstern, Brahehus und Sillekrog sind als Notoptionen markiert, nicht als erste Empfehlung.</li>
+        <li>Långholmen und Tantolunden laut Betreiber nur nutzen, wenn euer T5 offiziell als Wohnmobil zugelassen ist.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="shell">Wettertendenz und Platzinformationen geprüft am 18. Juli 2026. Fahrzeiten sind Näherungswerte ohne längere Pausen, Stau, Brückenwartezeit oder Fähre. Preise und Verfügbarkeit bitte vor Abfahrt prüfen.</footer>
+
+  <script>
+    const days = [
+      { id: 0, date: "So 19.7.", region: "Kopenhagen / Skåne", weather: "🌦️ 19-20° · Regen 40%", title: "Erste Nacht nach der langen Anfahrt", intro: "Klåveröd ist hier eure stärkste persönliche Option. Bellahøj nur, wenn Kopenhagen wirklich Teil des Tages sein soll. Vidöstern bleibt der lange Notlauf." },
+      { id: 1, date: "Mo 20.7.", region: "Vättern", weather: "⛅ 20° · Regen 20%", title: "Seetag am Vättern", intro: "Gute Bedingungen für Wasser und Insel. Getingaryd ist ruhig, Visingsö ist das kleine Abenteuer mit Fähre, Grännaberget die einfache Community-Option." },
+      { id: 2, date: "Di 21.7.", region: "Östergötland", weather: "🌦️ 18° · Regen 55%", title: "Seen, Schleusen oder Schlossruine", intro: "Bei wechselhaftem Wetter bieten Vårdnäs, Bergs Slussar und Stegeborg mehr Erlebnis als ein reiner Durchfahrtsplatz. Starfarm ist sehr klein, aber nur nach Bestätigung." },
+      { id: 3, date: "Mi 22.7.", region: "Sörmland", weather: "⛅ 21° · Regen 20%", title: "Küste und kleine Orte", intro: "Der freundlichere Tag passt zu Jogersö oder Trosa. Gustavsbergsgatan bleibt die beste legale Gratisvariante im Ort." },
+      { id: 4, date: "Do 23.7.", region: "Stockholm", weather: "🌤️ 21° · Regen 15%", title: "Stockholm in Reichweite", intro: "Flottsbro verbindet See und Stadt. Die beiden Innenstadtplätze funktionieren nur mit passender Wohnmobilzulassung." }
+    ];
+
+    const places = [
+      { id:"bellahoj", day:0, name:"Bellahøj Camping", location:"Kopenhagen", lat:55.705, lng:12.493, kind:"camping", tags:["city"], status:"regular", weather:"🌦️ 19/13° · Regen 40%", hh:"4 h 55", prev:"Hamburg", prevTime:"4 h 55", rest:"8 h 05", price:"Preis 2026 online prüfen", planning:"Saison 18.5. bis 31.8., Rezeption 7 bis 22 Uhr", description:"Temporärer Sommerplatz auf einer großen, freien Wiese nur 4,5 km vom Hauptbahnhof. Bus 2A und Rad funktionieren gut für die City. Eher funktional als idyllisch, aber die passende Kopenhagenlösung.", source:"https://www.bellahoj-camping.dk/en/" },
+      { id:"lomma", day:0, name:"Lomma Camping", location:"Lomma bei Malmö", lat:55.705, lng:13.065, kind:"camping", tags:["city","water"], status:"regular", weather:"🌦️ 20/13° · Regen 40%", hh:"5 h 35", prev:"Bellahøj", prevTime:"55 min", rest:"7 h 35", price:"Preis online prüfen", planning:"Im Juli reservieren", description:"Praktischer erster Schwedenstopp am langen Sandstrand. Malmö und Lund bleiben erreichbar. Etwas klassischer, aber wegen Strand und Lage weiterhin sinnvoll.", source:"https://lommacamping.se/en/" },
+      { id:"klaverod", day:0, name:"Klåveröd Logi & Café", location:"Söderåsen, Skåne", lat:56.039, lng:13.156, kind:"camping", tags:["top","creative"], status:"creative", weather:"🌦️ 20/13° · Regen 40%", hh:"6 h 10", prev:"Lomma", prevTime:"55 min", rest:"6 h 45", price:"Direkt anfragen", planning:"Vorher Kontakt aufnehmen, nur wenige Stromplätze", description:"Kleiner, persönlicher Naturstopp mit Café, Gästeküche und Sauna am Söderåsen. Wald statt Küstenbetrieb. Für eure Vorlieben die klar beste erste Nacht.", source:"https://klaverodlogi.se/" },
+      { id:"e4ans", day:0, name:"E4:ans Camping Vidöstern", location:"Toftaholm, Småland", lat:56.976, lng:14.030, kind:"camping", tags:["water","emergency"], status:"emergency", weather:"🌦️ 18/12° · Regen 50%", hh:"7 h 45", prev:"Klåveröd", prevTime:"1 h 50", rest:"5 h 15", price:"Preis vor Ort prüfen", planning:"Drop-in, keine Reservierung", description:"Direkt an der E4 und am See. Nützlich, falls ihr unbedingt noch Kilometer machen wollt oder alles andere voll ist. Atmosphäre und Konzept sind hier nicht der Hauptgrund.", source:"https://e4anscamping.com/en/engelska/" },
+
+      { id:"getingaryd", day:1, name:"Getingaryds Camping", location:"Vättern nördlich von Gränna", lat:58.096, lng:14.533, kind:"camping", tags:["top","water"], status:"regular", weather:"⛅ 20/12° · Regen 20%", hh:"9 h 30", prev:"Klåveröd", prevTime:"3 h 25", rest:"3 h 25", price:"Aktuellen Preis prüfen", planning:"Im Juli vorher anfragen", description:"Überschaubarer Platz direkt am Vättern mit Baden, Sauna, Angeln und Ruderboot. Ruhiger als Gränna und ohne unnötigen Resortcharakter.", source:"https://getingarydscamping.se/" },
+      { id:"oset", day:1, name:"Oset Huskvarna", location:"Südlicher Vättern", lat:57.802, lng:14.285, kind:"stellplatz", tags:["water","city"], status:"regular", weather:"⛅ 20/12° · Regen 20%", hh:"9 h", prev:"Klåveröd", prevTime:"2 h 55", rest:"3 h 55", price:"200 SEK Hauptsaison", planning:"12 Plätze, maximal 24 Stunden", description:"Kompakter kommunaler Platz am See mit Strom, Wasser, WC und Entsorgung. Weniger besonders, dafür legal, unkompliziert und stadtnah.", source:"https://www.jonkoping.se/trafik--stadsplanering/parkering/parkeringar-i-jonkoping-huskvarna-och-granna/stallplats-pa-oset-huskvarna" },
+      { id:"brahehus", day:1, name:"Brahehus Rastplats", location:"E4 bei Gränna", lat:58.053, lng:14.508, kind:"free", tags:["free","water","emergency"], status:"emergency", weather:"⛅ 20/12° · Regen 20%", hh:"9 h 20", prev:"Klåveröd", prevTime:"3 h 15", rest:"3 h 30", price:"Kostenlos, maximal 24 Stunden", planning:"Rastplatz, keine Campingmöbel", description:"Plan B direkt an der E4 mit Vätternblick, Burgruine, WC und Gastronomie. Gut bei Müdigkeit oder später Ankunft, nicht als gemütlicher Campingtagesabschluss.", source:"https://www.brahehus.com/" },
+      { id:"grannaberget", day:1, name:"Grännaberget Vereinsplatz", location:"Oberhalb von Gränna", lat:58.041, lng:14.459, kind:"community", tags:["creative"], status:"creative", weather:"⛅ 20/12° · Regen 20%", hh:"9 h 20", prev:"Klåveröd", prevTime:"3 h 15", rest:"3 h 35", price:"Gebühr per QR-Code vor Ort", planning:"Community-Eintrag prüfen, Schotter ganzjährig", description:"Ruhiger Stellplatz des örtlichen Orientierungslaufvereins. Seit 2025 mit Toilette, Dusche und Schwarzwasserentsorgung. Unprätentiös, lokal und spannender als der große Campingplatz unten.", source:"https://park4night.com/en/place/439888" },
+      { id:"visingso", day:1, name:"Visingsö Ställplats", location:"Insel Visingsö", lat:58.033, lng:14.349, kind:"stellplatz", tags:["top","creative","water"], status:"creative", weather:"⛅ 20/12° · Regen 20%", hh:"9 h 40 plus Fähre", prev:"Klåveröd", prevTime:"3 h 35 plus Fähre", rest:"3 h 55 plus Fähre", price:"Onlinepreis und Fähre prüfen", planning:"50 Plätze, online buchbar, Fährenzeit einplanen", description:"Übernachtung im Eichenwald direkt über Fähranleger und Hafen. Mit Strom, Dusche, WC und Wasser. Burgruine, Räder und Inselgefühl machen daraus einen echten Reisetag statt Zwischenstopp.", source:"https://www.visitvisingso.com/visings-stllplats" },
+
+      { id:"bergs", day:2, name:"Bergs Slussar", location:"Göta-Kanal bei Linköping", lat:58.484, lng:15.528, kind:"stellplatz", tags:["top","water"], status:"regular", weather:"🌦️ 18/11° · Regen 55%", hh:"10 h 40", prev:"Getingaryd", prevTime:"1 h 35", rest:"2 h 25", price:"280 SEK pro Nacht", planning:"25 Plätze, Drop-in, kein Strom", description:"Grüne Stellwiese unmittelbar an der Schleusentreppe. Dusche, WC, Wasser und Entsorgung. Auch bei Schauern gibt es mit Kanal und Schleusen etwas zu sehen.", source:"https://www.bergsslussar.com/stallplats/" },
+      { id:"vardnas", day:2, name:"Vårdnäs Stiftsgård", location:"Seenland südlich von Linköping", lat:58.260, lng:15.687, kind:"stellplatz", tags:["top","creative","water"], status:"creative", weather:"🌦️ 18/11° · Regen 55%", hh:"10 h 45", prev:"Getingaryd", prevTime:"1 h 45", rest:"2 h 45", price:"Ab etwa 200 SEK, aktuell prüfen", planning:"Nur 3 Plätze, alle mit Strom, first come", description:"Drei Stellplätze an einem kirchlichen Landgut zwischen Seen, Wiesen und Eichenwald. Dusche und WC inklusive, dazu Restaurant, Sauna, Kanus und Kinda-Kanal in der Umgebung.", source:"https://vardnas.se/boende/stallplatser_husbilar.html" },
+      { id:"himmelstalund", day:2, name:"Himmelstalund", location:"Norrköping", lat:58.590, lng:16.138, kind:"stellplatz", tags:["city","water"], status:"regular", weather:"🌦️ 18/11° · Regen 55%", hh:"11 h 20", prev:"Bergs Slussar", prevTime:"45 min", rest:"1 h 55", price:"200 SEK plus Service", planning:"62 Plätze, Drop-in", description:"Kommunaler Wiesenstellplatz am Motala ström mit Strom, Wasser und Entsorgung. Keine kreative Perle, aber bei Regen und später Ankunft verlässlich.", source:"https://visit.norrkoping.se/overnatta/campingplatser/campingplatser-10-15-minuter-fran-city/stallplatser-for-husbil-i-himmelstalund" },
+      { id:"stegeborg", day:2, name:"Stegeborgs Egendom", location:"Schärenbucht bei Söderköping", lat:58.437, lng:16.603, kind:"stellplatz", tags:["top","creative","water"], status:"creative", weather:"🌦️ 18/12° · Regen 50%", hh:"11 h 40", prev:"Bergs Slussar", prevTime:"1 h 15", rest:"2 h 05", price:"Aktuellen Stellplatzpreis prüfen", planning:"Buchung oder Drop-in, Umweg etwa 30 Minuten", description:"Kleine Camping- und Stellplatzbereiche am Yachthafen gegenüber der beleuchteten Schlossruine. Restaurant, Bad, Sauna und Eichenlandschaft. Der lohnendste Umweg dieses Abschnitts.", source:"https://www.stegeborg.se/" },
+      { id:"starfarm", day:2, name:"Starfarm Campspace", location:"Hävla, Östergötland", lat:58.915, lng:15.868, kind:"farm", tags:["creative","water"], status:"creative", weather:"🌦️ 18/11° · Regen 55%", hh:"11 h 55", prev:"Bergs Slussar", prevTime:"1 h 20", rest:"2 h 05", price:"Ab etwa 25 Euro", planning:"Nur 1 Pitch, Gastgeberbestätigung zwingend", description:"Ein einzelner Hofplatz zwischen Feld, Wald und See. Van und Wohnmobil sind zugelassen, Picknicktisch und Feuerkorb vorhanden. Sehr persönlich, aber die Gastgeberin antwortet laut Plattform eher langsam.", source:"https://campspace.com/en/s/reach-out-nature-unique-landscape-on-the-countryside-in-sweden_3771" },
+      { id:"inrehamnen", day:2, name:"Inre Hamnen", location:"Norrköping Zentrum", lat:58.595, lng:16.192, kind:"stellplatz", tags:["city","water"], status:"regular", weather:"🌦️ 18/11° · Regen 55%", hh:"11 h 30", prev:"Bergs Slussar", prevTime:"50 min", rest:"1 h 50", price:"Gebühr und Schilder vor Ort prüfen", planning:"Kommunale Innenstadtplätze", description:"Urbaner Stellbereich im neuen Innenhafen. Für Restaurants und Industriekultur statt Natur. Himmelstalund ist die ruhigere Alternative derselben Stadt.", source:"https://visit.norrkoping.se/nyheter/nyhetsarkiv/2024-06-19-nu-oppnar-stallplatser-for-husbil-i-inre-hamnen" },
+
+      { id:"spelhags", day:3, name:"Spelhagsvägen", location:"Nyköping Westhafen", lat:58.747, lng:17.008, kind:"stellplatz", tags:["city","water"], status:"regular", weather:"⛅ 21/13° · Regen 20%", hh:"12 h 15", prev:"Norrköping", prevTime:"50 min", rest:"1 h 20", price:"6 SEK pro Stunde oder 100 SEK pro Tag", planning:"Bis 10 Fahrzeuge, maximal 2 Tage", description:"Günstiger kommunaler Platz am Yachthafen mit acht Stromanschlüssen. Praktisch für Nyköping, aber weniger naturnah als Jogersö.", source:"https://www.nykoping.se/parkering" },
+      { id:"jogerso", day:3, name:"Jogersö Eco Camp", location:"Oxelösund", lat:58.654, lng:17.102, kind:"camping", tags:["top","water"], status:"regular", weather:"⛅ 21/13° · Regen 20%", hh:"12 h 20", prev:"Norrköping", prevTime:"1 h", rest:"1 h 40", price:"Etwa 195 bis 295 SEK, prüfen", planning:"Online buchbar", description:"Naturnaher Küstenplatz bei Wald, Schären und großem Badestrand. Rund 15 Minuten von der E4 und für den freundlicheren Mittwoch eine der stärksten Optionen.", source:"https://jogerso.se/en/" },
+      { id:"sillekrog", day:3, name:"Sillekrog Rastplats", location:"E4 südlich von Trosa", lat:58.917, lng:17.367, kind:"free", tags:["free","emergency"], status:"emergency", weather:"⛅ 21/13° · Regen 20%", hh:"12 h 35", prev:"Norrköping", prevTime:"1 h 10", rest:"1 h 05", price:"Kostenlos, maximal 24 Stunden", planning:"Rastplatz, keine Campingmöbel", description:"Reine Müdigkeits- und Spätankunftsoption direkt an der E4. WC, Essen und Abfallbehälter vorhanden. Nicht für einen geplanten schönen Abend.", source:"https://www.trafikverket.se/om-oss/nyheter/nationella-nyheter/2026/juli/ta-en-paus-och-kor-sakrare-i-sommar/" },
+      { id:"trosa", day:3, name:"Trosa Gästhamn", location:"Trosa", lat:58.892, lng:17.549, kind:"stellplatz", tags:["top","city","water"], status:"regular", weather:"⛅ 21/13° · Regen 20%", hh:"12 h 55", prev:"Norrköping", prevTime:"1 h 20", rest:"1 h", price:"Hafenpreis vor Ort prüfen", planning:"6 Plätze mit Strom, 13 ohne", description:"Kleine Bereiche am Gästehafen und den ABC-Stegen. Cafés, Flusspromenade und hübscher Ort direkt vor der Tür. Sehr guter letzter Zwischenstopp.", source:"https://www.trosa.se/infrastruktur-och-samhallsplanering/gator-och-parkering/parkering/" },
+      { id:"gustavsberg", day:3, name:"Gustavsbergsgatan", location:"Trosa", lat:58.901, lng:17.546, kind:"free", tags:["free","city"], status:"regular", weather:"⛅ 21/13° · Regen 20%", hh:"12 h 55", prev:"Norrköping", prevTime:"1 h 20", rest:"1 h", price:"Kostenlos, maximal 24 Stunden", planning:"Etwa 10 Plätze, kein Service", description:"Von der Gemeinde ausgewiesene Gratisplätze in Laufweite zum Zentrum. Die beste kostenlose Ortsoption, solange ihr dort wirklich nur parkt und übernachtet.", source:"https://www.trosa.se/infrastruktur-och-samhallsplanering/gator-och-parkering/parkering/" },
+
+      { id:"flottsbro", day:4, name:"Flottsbro Camping", location:"Huddinge südlich von Stockholm", lat:59.224, lng:17.888, kind:"camping", tags:["top","city","water"], status:"regular", weather:"🌤️ 21/14° · Regen 15%", hh:"13 h 05", prev:"Trosa", prevTime:"45 min", rest:"35 min", price:"Preis online prüfen", planning:"Im Juli reservieren", description:"Grüner Platz am Badesee mit Wandern und MTB. Stockholm etwa 20 Minuten per Auto, mit Bus und Pendeltåg ungefähr eine Stunde. Beste Mischung aus Natur und Stadt.", source:"https://www.flottsbro.se/de/" },
+      { id:"langholmen", day:4, name:"Långholmens Husbilscamping", location:"Stockholm Södermalm", lat:59.320, lng:18.032, kind:"stellplatz", tags:["city","water"], status:"regular", weather:"🌤️ 21/14° · Regen 15%", hh:"13 h 25", prev:"Flottsbro", prevTime:"30 min", rest:"15 min", price:"Onlinepreis prüfen", planning:"77 Plätze, früh buchen, nur Wohnmobile", description:"Sehr zentral auf der grünen Insel Långholmen mit Sanitär, Strom und Badestelle. Nur wählen, wenn euer T5 in den Papieren als Wohnmobil geführt wird.", source:"https://www.husbilstockholm.se/de" },
+      { id:"tantolunden", day:4, name:"Tantolundens Husbilscamping", location:"Stockholm Södermalm", lat:59.308, lng:18.047, kind:"stellplatz", tags:["city","water"], status:"regular", weather:"🌤️ 21/14° · Regen 15%", hh:"13 h 25", prev:"Flottsbro", prevTime:"35 min", rest:"10 min", price:"Onlinepreis prüfen", planning:"Nur 14 Plätze, nur Wohnmobile", description:"Winziger Innenstadtplatz im Tantolunden-Park. Noch zentraler, aber sehr schwer zu bekommen und ebenfalls nur für offiziell zugelassene Wohnmobile.", source:"https://www.husbilstockholm.se/de" }
+    ];
+
+    const storageKey = "stockholm-roadtrip-excluded-v3";
+    let activeDay = 0;
+    let activeFilter = "all";
+    let showExcluded = false;
+    let selectedId = "klaverod";
+    let excluded = new Set();
+    try { excluded = new Set(JSON.parse(localStorage.getItem(storageKey) || "[]")); } catch (_) {}
+
+    function saveExcluded() {
+      try { localStorage.setItem(storageKey, JSON.stringify([...excluded])); } catch (_) {}
+    }
+    function googleMapsUrl(place) {
+      return `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}&travelmode=driving`;
+    }
+    function weatherUrl(place) {
+      return `https://www.google.com/search?q=${encodeURIComponent(`Wetter ${place.location} 10 Tage`)}`;
+    }
+    function mapEmbedUrl(place) {
+      return `https://maps.google.com/maps?q=${place.lat},${place.lng}&z=12&output=embed`;
+    }
+    function badgeLabel(place) {
+      const labels = { camping:"Camping", stellplatz:"Stellplatz", free:"Gratis 24 h", community:"Community-Platz", farm:"Hofplatz" };
+      return labels[place.kind] || place.kind;
+    }
+    function visibleByFilter(place) {
+      if (activeFilter === "all") return true;
+      if (activeFilter === "top") return place.tags.includes("top");
+      if (activeFilter === "creative") return place.tags.includes("creative");
+      if (activeFilter === "free") return place.tags.includes("free");
+      if (activeFilter === "city") return place.tags.includes("city");
+      if (activeFilter === "emergency") return place.status === "emergency";
+      return true;
+    }
+    function markerColor(place) {
+      if (place.status === "emergency") return "#dc863b";
+      if (place.tags.includes("creative")) return "#247b9b";
+      return "#2f7655";
+    }
+
+    function renderTabs() {
+      document.getElementById("dayTabs").innerHTML = days.map(day => `
+        <button class="day-tab ${day.id === activeDay ? "active" : ""}" data-day="${day.id}">
+          <span class="date">${day.date}</span><strong class="region">${day.region}</strong><span class="weather-mini">${day.weather}</span>
+        </button>`).join("");
+      document.querySelectorAll("[data-day]").forEach(button => button.addEventListener("click", () => {
+        activeDay = Number(button.dataset.day);
+        const candidates = places.filter(p => p.day === activeDay && !excluded.has(p.id));
+        if (candidates.length) selectedId = (candidates.find(p => p.tags.includes("top")) || candidates[0]).id;
+        render();
+      }));
+    }
+
+    function renderHeading() {
+      const day = days[activeDay];
+      document.getElementById("dayHeading").innerHTML = `<div><h2>${day.date} · ${day.title}</h2><p>${day.intro}</p></div><div class="day-weather"><strong>${day.weather.split(" · ")[0]}</strong><span>${day.weather.split(" · ")[1]}</span></div>`;
+    }
+
+    function renderCards() {
+      let list = places.filter(place => place.day === activeDay && visibleByFilter(place));
+      if (!showExcluded) list = list.filter(place => !excluded.has(place.id));
+      const cards = document.getElementById("cards");
+      if (!list.length) {
+        cards.innerHTML = `<article class="place-card"><h3>Keine sichtbaren Optionen</h3><p class="description">Filter ändern oder ausgeklammerte Kacheln wieder anzeigen.</p></article>`;
+        return;
+      }
+      cards.innerHTML = list.map((place, index) => {
+        const isExcluded = excluded.has(place.id);
+        return `<article class="place-card ${place.status} ${place.tags.includes("top") ? "top" : ""} ${isExcluded ? "excluded" : ""}" id="place-${place.id}">
+          <div class="card-head">
+            <span class="marker-number">${index + 1}</span>
+            <div class="title-wrap"><h3>${place.name}</h3><span class="location">${place.location}</span></div>
+            <button class="exclude-btn" data-exclude="${place.id}" title="${isExcluded ? "Wieder aufnehmen" : "Ausklammern"}" aria-label="${place.name} ${isExcluded ? "wieder aufnehmen" : "ausklammern"}">${isExcluded ? "+" : "×"}</button>
+          </div>
+          <div class="badges">
+            <span class="badge">${badgeLabel(place)}</span>
+            ${place.tags.includes("top") ? '<span class="badge">Favorit</span>' : ''}
+            ${place.tags.includes("creative") ? '<span class="badge creative">kreativ & klein</span>' : ''}
+            ${place.tags.includes("free") ? '<span class="badge free">gratis</span>' : ''}
+            ${place.tags.includes("city") ? '<span class="badge city">stadtnah</span>' : ''}
+            ${place.status === "emergency" ? '<span class="badge emergency">nur Notoption</span>' : ''}
+          </div>
+          <p class="description">${place.description}</p>
+          <div class="weather-row"><span class="icon">${place.weather.split(" ")[0]}</span><div><strong>Wetter am ${days[place.day].date}: ${place.weather.substring(place.weather.indexOf(" ") + 1)}</strong><span>Tendenz vom 18.7. · <a href="${weatherUrl(place)}" target="_blank" rel="noopener">live prüfen</a></span></div></div>
+          <div class="travel"><div><span>ab Hamburg über Brücken</span><strong>${place.hh}</strong></div><div><span>ab ${place.prev}</span><strong>${place.prevTime}</strong></div><div><span>bis Stockholm</span><strong>${place.rest}</strong></div></div>
+          <div class="notes"><strong>Kosten:</strong> ${place.price}<br><strong>Planung:</strong> ${place.planning}</div>
+          <div class="links"><a class="link-btn" href="${googleMapsUrl(place)}" target="_blank" rel="noopener">Google Maps ↗</a><a class="link-btn" href="${place.source}" target="_blank" rel="noopener">Info / Quelle ↗</a><a class="link-btn" href="#map" data-select="${place.id}">Auf Karte</a></div>
+        </article>`;
+      }).join("");
+
+      document.querySelectorAll("[data-exclude]").forEach(button => button.addEventListener("click", () => toggleExcluded(button.dataset.exclude)));
+      document.querySelectorAll("[data-select]").forEach(link => link.addEventListener("click", event => {
+        event.preventDefault(); selectPlace(link.dataset.select, true);
+      }));
+    }
+
+    function project(place) {
+      const x = 48 + ((place.lng - 9.9) / 8.3) * 385;
+      const y = 565 - ((place.lat - 53.5) / 5.9) * 510;
+      return [Math.max(30, Math.min(450, x)), Math.max(30, Math.min(590, y))];
+    }
+    function spreadPoint(place, index, list) {
+      const point = project(place);
+      const closeBefore = list.slice(0, index).filter(other => {
+        const otherPoint = project(other);
+        return Math.hypot(otherPoint[0] - point[0], otherPoint[1] - point[1]) < 34;
+      }).length;
+      if (!closeBefore) return point;
+      const angle = closeBefore * 2.15;
+      const radius = 24 + Math.floor((closeBefore - 1) / 3) * 10;
+      return [point[0] + Math.cos(angle) * radius, point[1] + Math.sin(angle) * radius];
+    }
+    function renderMap() {
+      const svg = document.getElementById("routeSvg");
+      const route = [
+        {lat:53.551,lng:9.994}, {lat:54.794,lng:9.447}, {lat:55.404,lng:10.402}, {lat:55.676,lng:12.568},
+        {lat:55.605,lng:13.004}, {lat:57.783,lng:14.162}, {lat:58.411,lng:15.621}, {lat:58.588,lng:16.192},
+        {lat:58.892,lng:17.549}, {lat:59.329,lng:18.069}
+      ];
+      const path = route.map((point, index) => {
+        const p = project(point); return `${index ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+      }).join(" ");
+      const dayPlaces = places.filter(place => place.day === activeDay && visibleByFilter(place) && (showExcluded || !excluded.has(place.id)));
+      svg.innerHTML = `
+        <path class="map-route" d="${path}"/>
+        <circle cx="52" cy="565" r="6" fill="#173a33"/><text class="map-label" x="66" y="570">Hamburg</text>
+        <circle cx="433" cy="55" r="6" fill="#173a33"/><text class="map-label" x="345" y="49">Stockholm</text>
+        ${dayPlaces.map((place, index) => { const p = spreadPoint(place, index, dayPlaces); return `<g class="map-marker ${excluded.has(place.id) ? "excluded" : ""}" data-map-id="${place.id}" transform="translate(${p[0].toFixed(1)} ${p[1].toFixed(1)})"><circle r="${place.id === selectedId ? 15 : 12}" fill="${markerColor(place)}"/><text y="3">${index + 1}</text></g>`; }).join("")}`;
+      document.querySelectorAll("[data-map-id]").forEach(marker => marker.addEventListener("click", () => selectPlace(marker.dataset.mapId, false)));
+    }
+
+    function renderSelected() {
+      let place = places.find(p => p.id === selectedId);
+      if (!place || place.day !== activeDay) place = places.find(p => p.day === activeDay && !excluded.has(p.id)) || places.find(p => p.day === activeDay);
+      if (!place) return;
+      selectedId = place.id;
+      document.getElementById("selectedSpot").innerHTML = `<span class="selection-label">Ausgewählter Spot</span><h3>${place.name}</h3><p>${place.location} · ${place.description}</p><div class="links"><a class="link-btn" href="${googleMapsUrl(place)}" target="_blank" rel="noopener">Route in Google Maps ↗</a></div>`;
+      document.getElementById("googleMap").src = mapEmbedUrl(place);
+    }
+
+    function selectPlace(id, scroll) {
+      selectedId = id;
+      renderMap();
+      renderSelected();
+      if (scroll) document.getElementById("map").scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+    function toggleExcluded(id) {
+      if (excluded.has(id)) excluded.delete(id); else excluded.add(id);
+      saveExcluded();
+      const remaining = places.filter(p => p.day === activeDay && !excluded.has(p.id));
+      if (excluded.has(selectedId) && remaining.length) selectedId = remaining[0].id;
+      render();
+    }
+    function renderStatus() {
+      document.getElementById("hiddenCount").textContent = excluded.size ? `${excluded.size} ausgeklammert` : "nichts ausgeklammert";
+      document.getElementById("showExcluded").textContent = showExcluded ? "Ausgeklammerte verbergen" : "Ausgeklammerte zeigen";
+      document.getElementById("showExcluded").classList.toggle("active", showExcluded);
+      document.getElementById("optionFact").textContent = `${places.length - excluded.size} von ${places.length} Optionen aktiv`;
+    }
+    function render() {
+      renderTabs(); renderHeading(); renderCards(); renderMap(); renderSelected(); renderStatus();
+    }
+
+    document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
+      activeFilter = button.dataset.filter;
+      document.querySelectorAll("[data-filter]").forEach(item => item.classList.toggle("active", item === button));
+      render();
+    }));
+    document.getElementById("showExcluded").addEventListener("click", () => { showExcluded = !showExcluded; render(); });
+    document.getElementById("resetExcluded").addEventListener("click", () => { excluded.clear(); saveExcluded(); render(); });
+    render();
+  </script>
+</body>
+</html>
